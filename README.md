@@ -1,4 +1,3 @@
-@ -1,2 +1,48 @@
 Hey,
 Bienvenue dans LaDiscorde, un de nos grand proget qui a pour d'être un geant au niveau de la communication, de détronner les geants capitalistiquement capitaliste
 LaDiscorde est un projet de plateforme de communication libre dont l’objectif est simple :
