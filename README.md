@@ -1,12 +1,12 @@
 <div align="center">
 
-<!-- ANIMATED LOGO -->
+<!-- ANIMATED LOGO — fichier à la racine du repo -->
 <img src="assets/logo_animated.svg" width="180" alt="LaDiscorde Logo"/>
 
 <br/>
 
 <!-- TYPING ANIMATION TITLE -->
-<img src="https://readme-typing-svg.demolab.com?font=Share+Tech+Mono&size=42&duration=3000&pause=1500&color=CC0000&background=00000000&center=true&vCenter=true&width=600&height=70&lines=LA+DISCORDE;%F0%9F%94%A5+COMMUNICATION+LIBRE;%E2%9A%A1+OPEN+SOURCE+%26+RADICAL" alt="LaDiscorde"/>
+<img src="https://readme-typing-svg.demolab.com?font=Share+Tech+Mono&size=42&duration=3000&pause=1500&color=CC0000&background=00000000&center=true&vCenter=true&width=600&height=70&lines=LA+DISCORDE;COMMUNICATION+LIBRE;OPEN+SOURCE;LIBRE" alt="LaDiscorde"/>
 
 <br/>
 
