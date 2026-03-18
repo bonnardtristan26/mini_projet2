@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="200" height="200">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1a0000"/>
+      <stop offset="60%" stop-color="#0d0000"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <filter id="redGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="outerGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <clipPath id="circleClip">
+      <circle cx="200" cy="200" r="178"/>
+    </clipPath>
+  </defs>
+
+  <!-- Outer glow ring (animated) -->
+  <circle cx="200" cy="200" r="185" fill="none" stroke="#cc0000" stroke-width="3" filter="url(#outerGlow)" opacity="0.7">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite"/>
+    <animate attributeName="stroke-width" values="2;5;2" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="178" fill="url(#bgGlow)"/>
+  <circle cx="200" cy="200" r="178" fill="none" stroke="#cc0000" stroke-width="2.5"/>
+
+  <!-- Logo shape (geometric/angular Discord-like mascot) clipped to circle -->
+  <g clip-path="url(#circleClip)" filter="url(#redGlow)">
+    <!-- Main body shape - angular -->
+    <polygon points="
+      110,135
+      145,118
+      175,112
+      225,112
+      258,118
+      292,137
+      305,165
+      308,200
+      300,228
+      280,250
+      265,265
+      250,278
+      230,285
+      200,288
+      170,285
+      150,278
+      135,265
+      120,250
+      100,228
+      92,200
+      94,165
+    " fill="#cc0000"/>
+
+    <!-- Left eye socket -->
+    <polygon points="
+      145,175
+      162,165
+      182,168
+      188,185
+      185,200
+      170,208
+      152,205
+      140,192
+    " fill="#0a0000"/>
+
+    <!-- Right eye socket -->
+    <polygon points="
+      212,168
+      232,163
+      252,168
+      262,182
+      258,198
+      242,207
+      222,205
+      210,192
+      208,178
+    " fill="#0a0000"/>
+
+    <!-- Smile cutout -->
+    <polygon points="
+      148,235
+      162,225
+      180,230
+      200,228
+      220,230
+      238,225
+      252,235
+      248,255
+      235,270
+      220,278
+      200,280
+      180,278
+      165,270
+      152,255
+    " fill="#0a0000"/>
+
+    <!-- Ear/notch left -->
+    <polygon points="
+      110,135
+      128,125
+      138,145
+      120,155
+    " fill="#cc0000"/>
+
+    <!-- Ear/notch right -->
+    <polygon points="
+      290,135
+      272,125
+      262,145
+      280,155
+    " fill="#cc0000"/>
+
+    <!-- Jagged scratch marks for the "corrupted" look -->
+    <polygon points="145,118 152,108 158,118 150,122" fill="#ff2200" opacity="0.6"/>
+    <polygon points="248,112 255,102 261,114 254,118" fill="#ff2200" opacity="0.6"/>
+    <polygon points="92,200 82,195 84,210 94,208" fill="#ff2200" opacity="0.5"/>
+    <polygon points="308,200 318,195 316,210 306,208" fill="#ff2200" opacity="0.5"/>
+  </g>
+
+  <!-- Pulsing inner glow overlay -->
+  <circle cx="200" cy="200" r="178" fill="none" stroke="#ff0000" stroke-width="1" opacity="0.3">
+    <animate attributeName="opacity" values="0.1;0.5;0.1" dur="3s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Scan line effect -->
+  <rect x="22" y="0" width="356" height="400" fill="url(#scanLines)" opacity="0.05" clip-path="url(#circleClip)"/>
+</svg>
