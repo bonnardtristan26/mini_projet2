@@ -66,50 +66,15 @@ créer un espace **puissant, ouvert et accessible** pour discuter, collaborer et
 ```
 LaDiscorde/
 │
-├── 📁 frontend/
-│   ├── 📁 public/
-│   │   ├── 🖼️  index.html
-│   │   └── 🖼️  favicon.ico
-│   ├── 📁 src/
-│   │   ├── 📁 components/
-│   │   │   ├── 🟨 Sidebar.js
-│   │   │   ├── 🟨 ChatBox.js
-│   │   │   ├── 🟨 MessageInput.js
-│   │   │   └── 🟨 ServerList.js
-│   │   ├── 📁 pages/
-│   │   │   ├── 🟨 Home.js
-│   │   │   ├── 🟨 Login.js
-│   │   │   └── 🟨 Dashboard.js
-│   │   ├── 📁 styles/
-│   │   │   └── 🎨 main.css
-│   │   └── 🟨 App.js
-│   └── 📦 package.json
-│
-├── 📁 backend/
-│   ├── 📁 src/
-│   │   ├── 📁 routes/
-│   │   │   ├── 🐍 auth.py
-│   │   │   ├── 🐍 messages.py
-│   │   │   └── 🐍 servers.py
-│   │   ├── 📁 models/
-│   │   │   ├── 🐍 user.py
-│   │   │   ├── 🐍 server.py
-│   │   │   └── 🐍 message.py
-│   │   ├── 📁 websocket/
-│   │   │   └── 🐍 handler.py
-│   │   └── 🐍 main.py
-│   └── 📋 requirements.txt
-│
-├── 📁 database/
-│   ├── 🗄️  schema.sql
-│   └── 📁 migrations/
+├── 📄 HTML.html
+├── 🎨 CSS.css
+├── 🟨 partieClient.js
+├── 🟨 serveur.js
+├── 🖼️  logo_animated.svg
 │
 ├── 📁 assets/
-│   └── 🖼️  logo_animated.svg
+│   └── (images, icônes, médias)
 │
-├── 📄 .env.example
-├── 🐳 docker-compose.yml
-├── 📋 .gitignore
 └── 📖 README.md
 ```
 
