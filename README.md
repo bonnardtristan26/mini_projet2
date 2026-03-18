@@ -67,9 +67,9 @@ LaDiscorde/
 ├── 🎨 CSS.css
 ├── 🟨 partieClient.js
 ├── 🟨 serveur.js
-├── 🖼️  logo_animated.svg
 │
 ├── 📁 assets/
+│   └── 🖼️  logo_animated.svg
 │   └── (images, icônes, médias)
 │
 └── 📖 README.md
