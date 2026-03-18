@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- ANIMATED LOGO -->
-<img src="image/logo_animated.svg" width="180" alt="LaDiscorde Logo"/>
+<img src="assets/logo_animated.svg" width="180" alt="LaDiscorde Logo"/>
 
 <br/>
 
