@@ -12,9 +12,7 @@
 
 <!-- BADGES -->
 ![Status](https://img.shields.io/badge/STATUS-EN%20D%C3%89VELOPPEMENT-cc0000?style=for-the-badge&logo=statuspage&logoColor=white)
-![License](https://img.shields.io/badge/LICENCE-MIT-000000?style=for-the-badge&logo=open-source-initiative&logoColor=cc0000)
 ![Open Source](https://img.shields.io/badge/OPEN--SOURCE-OUI-cc0000?style=for-the-badge&logo=github&logoColor=white)
-![PRs Welcome](https://img.shields.io/badge/PRs-BIENVENUES-black?style=for-the-badge&logo=git&logoColor=cc0000)
 
 <br/><br/>
 
