@@ -34,34 +34,33 @@ créer un espace **puissant, ouvert et accessible** pour discuter, collaborer et
 
 ---
 
-## 🎯 Objectifs du projet
+## Objectifs du projet
 
 | Objectif | Description |
 |:---:|:---|
 | 💬 | Créer une **plateforme de communication moderne** |
 | 🌍 | Favoriser les **communautés libres et ouvertes** |
-| 🔐 | **Respecter la vie privée** des utilisateurs |
+| 🔐 | **Respecter la vie privée** des utilisateurs *aucun modération **😏😔😈*** |
 | ⚡ | Offrir des **performances rapides et fiables** |
 | 🛠️ | Construire un projet **open-source collaboratif** |
 
 ---
 
-## 🧩 Fonctionnalités prévues
+## Fonctionnalités prévues
 
 ```
   LaDiscorde — Roadmap des fonctionnalités
   ─────────────────────────────────────────
-  ✅  Messagerie instantanée
-  ✅  Création de serveurs & communautés
-  🔜  Salons texte & vocaux
-  🔜  Système de rôles & permissions
-  🔜  Bots & extensions
-  🔜  Interface moderne & personnalisable
+    Messagerie instantanée
+    Création de serveurs & discution privée
+    Salons texte & vocaux
+    Interface moderne & personnalisable
+    Des Radios au choix (moscou, washinton, Paris, Pékin, Tokyo, ...)
 ```
 
 ---
 
-## 🗂️ Structure du projet
+## Structure du projet
 
 ```
 LaDiscorde/
@@ -100,20 +99,9 @@ LaDiscorde/
 
 ## 🚀 Lancer le projet
 
-```bash
-# Cloner le dépôt
-git clone https://github.com/ton-pseudo/LaDiscorde.git
-cd LaDiscorde
-
-# Installer les dépendances frontend
-cd frontend && npm install
-
-# Installer les dépendances backend
-cd ../backend && pip install -r requirements.txt
-
-# Lancer l'application
-docker-compose up --build
 ```
+pas prêt pour l'instant ...
+``` 
 
 ---
 
@@ -138,12 +126,6 @@ Les contributions sont les bienvenues ! Voici comment participer :
 ![GitHub Issues](https://img.shields.io/github/issues/ton-pseudo/LaDiscorde?style=for-the-badge&color=cc0000&logo=github)
 
 </div>
-
----
-
-## 📜 Licence
-
-Ce projet est sous licence **MIT** — libre à toi de l'utiliser, le modifier et le redistribuer.
 
 ---
 
