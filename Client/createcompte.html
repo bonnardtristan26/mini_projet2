@@ -7,7 +7,40 @@
 </head>
 <body>
 
-<h1 style="text-align: center;">LaDiscorde</h1>
+<style>
+@font-face {
+  font-family: "LoserMotoClub";
+  src: url('../Ressource/Front/LoserMotoClub.ttf');
+}
+.title {
+  font-family: "LoserMotoClub", sans-serif;
+}
+</style>
+
+<div style="text-align: center; margin-top: 20px;">
+  <p class="title" style="font-size: 30px; margin: 0; color: white;">LaDiscorde</p>
+</div>
+
+<div style="text-align: right; margin: -40px 20px 0 20px;">
+    <img src="../Ressource/Image/logo_LaDiscorde.png" style="width: 60px; height: auto;" alt="Logo LaDiscorde">
+</div>
+
+<style>
+@font-face {
+  font-family: "MaPolice";
+  src: url('../Ressource/Front/DRExclusiveEditorial.ttf'); 
+}
+body {
+  font-family: "MaPolice", sans-serif;
+  background-image: url("../Ressource/Image/fond_LaDiscorde.png");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position-y: 20%;
+  margin: 0;
+  color: white;
+}
+</style>
+
 
 <style>
 body {
@@ -18,18 +51,22 @@ background-position-y: 20%;
 }
 </style>
 
-<div style="text-align: center">
-    <img src="../Ressource/Image/logo_LaDiscorde.png" style="width: 250px; height: auto;"/>
-</div>
-
+<div style="width: 360px;height: auto;  margin: 120px auto;border: 2px solid rgba(255, 0, 0, 0.8);border-radius: 20px;  background: linear-gradient(180deg, rgba(40, 40, 40, 0.95) 0%,rgba(10, 10, 10, 0.9) 100%);  box-shadow: 0 0 25px rgba(255, 0, 0, 0.25);  padding: 30px;  text-align: center;  color: white;">
+    <div style="text-align: center">
+    <img src="../Ressource/Image/logo_LaDiscorde.png" alt="le logo de LaDiscorde" style="width: 300px; height: auto;"/>
     <div id="logincreatecompte" style="text-align: center;">
-        <input type="text" id="username" placeholder="Entrer un nom d'utilisateur">
-        <input type="text" id="password" placeholder="Créer un mot de passe">
+        <input type="text" id="username" placeholder="Entrer un nom d'utilisateur"><BR>
+        <input type="text" id="password" placeholder="Créer un mot de passe"><BR>
         <button onclick="senduser()">Inscription</button>
         <p>Vous avez déjà un compte ? 
         <a id="connection" data-testid="connection" href="https://sevetys.fr/conseils-veterinaires/chat/race-de-chats/europeen-european-shorthair/">se connecter</a></p>
-        <p>Créer un compte</p>
     </div>
+</div>
+</div>
+
+<div style="position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center;">
+    <p style="color: white; font-size: 24px; margin: 0;">Créer un compte</p>
+</div>
 
 <script src="script.js"></script>
 </body>
