@@ -117,6 +117,7 @@ function disconnect() {
     // 💡 Réflexe à avoir :
     // toujours “nettoyer” une connexion avant de quitter
 }
+console.log("Script chargé !");
 
 const socket = new WebSocket("ws://10.16.26.20:3000");
 
