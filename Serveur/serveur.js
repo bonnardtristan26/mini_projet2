@@ -81,7 +81,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Servir le dossier Client
-app.use(express.static(path.join(__dirname, "Client")));
+app.use(express.static(path.join(__dirname, "../Client")));
 
 const wss = new WebSocketServer({ server });
 

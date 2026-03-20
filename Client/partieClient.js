@@ -117,3 +117,31 @@ function disconnect() {
     // 💡 Réflexe à avoir :
     // toujours “nettoyer” une connexion avant de quitter
 }
+
+const socket = new WebSocket("ws://localhost:3000");
+
+const messagesDiv = document.getElementById("messages");
+const input = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+
+socket.addEventListener("open", () => {
+  console.log("Connecté au serveur WebSocket");
+});
+
+socket.addEventListener("message", (event) => {
+  const msg = document.createElement("div");
+  msg.textContent = event.data;
+  messagesDiv.appendChild(msg);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+});
+
+sendBtn.addEventListener("click", () => {
+  if (input.value.trim() !== "") {
+    socket.send(input.value);
+    input.value = "";
+  }
+});
+
+input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendBtn.click();
+});
