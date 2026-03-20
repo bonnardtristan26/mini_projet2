@@ -7,24 +7,29 @@
 </head>
 <body>
 
-<h1>LaDiscorde</h1>
+<h1 style="text-align: center;">LaDiscorde</h1>
 
-<img class="image_LaDiscorde" src="../Image/logo_LaDiscorde.png"/>
+<style>
+body {
+  background-image: url("../Ressource/Image/fond_LaDiscorde.png");
+  background-repeat: no-repeat;
+  background-size: 100%;
+background-position-y: 20%;
+}
+</style>
 
-<div id="chat-container">
+<div style="text-align: center">
+    <img src="../Ressource/Image/logo_LaDiscorde.png" style="width: 250px; height: auto;"/>
+</div>
 
-    <div id="logincreatecompte"></div>
-
-    <div id="input-area">
+    <div id="logincreatecompte" style="text-align: center;">
         <input type="text" id="username" placeholder="Entrer un nom d'utilisateur">
         <input type="text" id="password" placeholder="Créer un mot de passe">
-        <button onclick="sendMessage()">Inscription</button>
+        <button onclick="senduser()">Inscription</button>
         <p>Vous avez déjà un compte ? 
         <a id="connection" data-testid="connection" href="https://sevetys.fr/conseils-veterinaires/chat/race-de-chats/europeen-european-shorthair/">se connecter</a></p>
         <p>Créer un compte</p>
     </div>
-
-</div>
 
 <script src="script.js"></script>
 </body>

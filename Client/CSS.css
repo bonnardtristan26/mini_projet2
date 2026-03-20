@@ -30,5 +30,11 @@ button{
 }
 
 .image_LaDiscorde {
-    width: 646px;
+    width: 100px;
+    height: auto;
+}
+
+.fond {
+  background-image: url("../Image/fond_LaDiscorde.png");
+  background-size: cover;
 }
