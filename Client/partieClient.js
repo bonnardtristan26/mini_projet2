@@ -116,9 +116,10 @@ function disconnect() {
     // 💡 Réflexe à avoir :
     // toujours “nettoyer” une connexion avant de quitter
 }
-console.log("Script chargé !");
 
-const socket = new WebSocket("ws://10.16.26.20:3000");
+
+//Création du socket sur l'IP de la machine
+const socket = new WebSocket("ws://10.16.26.20:3000"); //IP à changer selon l'ordinateur sur lequel on lance
 
 const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("messageInput");

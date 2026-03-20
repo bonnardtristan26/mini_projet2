@@ -68,6 +68,14 @@ function handleDisconnection() {
     // - utilisateurs “fantômes”
 }
 
+//ATTENTION : COMMANDES A EXECUTER POUR LANCER LE SERVEUR (a executer dans l'invite de commande, dans le dossier Serveur)
+
+//npm init -y
+//npm install express ws
+//node serveur.js
+
+//NE PAS OUBLIER DE FAIRE LES COMMENTAIRES POUR EXPLIQUER CHAQUE PARTIES
+
 import express from "express";
 import { WebSocketServer } from "ws";
 import http from "http";
