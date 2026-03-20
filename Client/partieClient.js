@@ -118,7 +118,7 @@ function disconnect() {
     // toujours “nettoyer” une connexion avant de quitter
 }
 
-const socket = new WebSocket("ws://localhost:3000");
+const socket = new WebSocket("ws://10.16.26.20:3000");
 
 const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("messageInput");
