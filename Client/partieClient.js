@@ -1,4 +1,4 @@
-let socket;
+const socket = new WebSocket("ws://localhost:8080");
 
 // Initialiser le chat
 function initChat() {
@@ -10,6 +10,10 @@ function initChat() {
 
     // 💡 Réflexe à avoir :
     // toujours centraliser le démarrage ici pour garder un code organisé
+    socket.addEventListener("open", () => {
+        console.log("Connecté au serveur WebSocket");
+        socket.send("Bonjour serveur !");
+    });
 }
 
 
