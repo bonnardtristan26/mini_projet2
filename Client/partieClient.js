@@ -128,6 +128,14 @@ socket.addEventListener("open", () => {
   console.log("Connecté au serveur WebSocket");
 });
 
+socket.addEventListener("open", () => {
+  console.log("Connexion WebSocket OK !");
+});
+
+socket.addEventListener("error", () => {
+  console.log("Erreur WebSocket !");
+});
+
 socket.addEventListener("message", (event) => {
   const msg = document.createElement("div");
   msg.textContent = event.data;
