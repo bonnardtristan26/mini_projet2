@@ -1,4 +1,3 @@
-let socket;
 
 // Initialiser le chat
 function initChat() {
@@ -127,10 +126,6 @@ const sendBtn = document.getElementById("sendBtn");
 
 socket.addEventListener("open", () => {
   console.log("Connecté au serveur WebSocket");
-});
-
-socket.addEventListener("open", () => {
-  console.log("Connexion WebSocket OK !");
 });
 
 socket.addEventListener("error", () => {
