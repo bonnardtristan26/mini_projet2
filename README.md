@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- ANIMATED LOGO — fichier à la racine du repo -->
-<img src="assets/logo_animated.svg" width="180" alt="LaDiscorde Logo"/>
+<img src="Image/logo_animated.svg" width="180" alt="LaDiscorde Logo"/>
 
 <br/>
 
@@ -104,11 +104,7 @@ pas prêt pour l'instant ...
 
 Les contributions sont les bienvenues ! Voici comment participer :
 
-1. **Fork** le projet
-2. Crée ta branche → `git checkout -b feature/ma-feature`
-3. **Commit** tes changements → `git commit -m "feat: ma super feature"`
-4. **Push** → `git push origin feature/ma-feature`
-5. Ouvre une **Pull Request** 🔥
+**Une communication libre *mais pas si libre que sa***
 
 ---
 
