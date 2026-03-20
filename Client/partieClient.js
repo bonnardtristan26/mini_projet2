@@ -1,4 +1,3 @@
-let socket;
 
 // Initialiser le chat
 function initChat() {
@@ -117,3 +116,36 @@ function disconnect() {
     // 💡 Réflexe à avoir :
     // toujours “nettoyer” une connexion avant de quitter
 }
+console.log("Script chargé !");
+
+const socket = new WebSocket("ws://10.16.26.20:3000");
+
+const messagesDiv = document.getElementById("messages");
+const input = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+
+socket.addEventListener("open", () => {
+  console.log("Connecté au serveur WebSocket");
+});
+
+socket.addEventListener("error", () => {
+  console.log("Erreur WebSocket !");
+});
+
+socket.addEventListener("message", (event) => {
+  const msg = document.createElement("div");
+  msg.textContent = event.data;
+  messagesDiv.appendChild(msg);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+});
+
+sendBtn.addEventListener("click", () => {
+  if (input.value.trim() !== "") {
+    socket.send(input.value);
+    input.value = "";
+  }
+});
+
+input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendBtn.click();
+});

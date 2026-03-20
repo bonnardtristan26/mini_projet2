@@ -67,3 +67,39 @@ function handleDisconnection() {
     // - bugs
     // - utilisateurs “fantômes”
 }
+
+import express from "express";
+import { WebSocketServer } from "ws";
+import http from "http";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const server = http.createServer(app);
+
+// Servir le dossier Client
+app.use(express.static(path.join(__dirname, "../Client")));
+
+const wss = new WebSocketServer({ server });
+
+wss.on("connection", (ws) => {
+  console.log("Client connecté");
+
+  ws.on("message", (message) => {
+    console.log("Message reçu :", message.toString());
+
+    // Diffusion à tous les clients
+    wss.clients.forEach((client) => {
+      if (client.readyState === ws.OPEN) {
+        client.send(message.toString());
+      }
+    });
+  });
+});
+
+server.listen(3000, () => {
+  console.log("Serveur lancé sur http://localhost:3000");
+});
