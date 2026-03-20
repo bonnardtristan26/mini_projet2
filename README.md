@@ -38,7 +38,7 @@ créer un espace **puissant, ouvert et accessible** pour discuter, collaborer et
 |:---:|:---|
 | 💬 | Créer une **plateforme de communication moderne** |
 | 🌍 | Favoriser les **communautés libres et ouvertes** |
-| 🔐 | **Respecter la vie privée** des utilisateurs *aucun modération **😏😔😈*** |
+| 🔐 | **Respecter la vie privée** des utilisateurs *aucune modération **😏😔😈*** |
 | ⚡ | Offrir des **performances rapides et fiables** |
 | 🛠️ | Construire un projet **open-source collaboratif** |
 
