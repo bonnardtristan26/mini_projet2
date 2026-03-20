@@ -10,6 +10,7 @@ function initChat() {
 
     // 💡 Réflexe à avoir :
     // toujours centraliser le démarrage ici pour garder un code organisé
+    //test
 }
 
 
