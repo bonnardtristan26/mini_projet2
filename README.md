@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- ANIMATED LOGO — fichier à la racine du repo -->
-<img src="Ressource/Image/logo_LaDiscorde.mp4" width="180" alt="LaDiscorde Logo"/>
+<img src="Ressource/Image/logo_LaDiscorde_animated.svg" width="180" alt="LaDiscorde Logo"/>
 
 <br/>
 
