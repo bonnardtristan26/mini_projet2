@@ -150,3 +150,91 @@ sendBtn.addEventListener("click", () => {
 input.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendBtn.click();
 });
+
+
+
+
+
+
+
+
+
+//partie mdp
+
+// ─── Fonction : hacher une chaîne en SHA-256 (Web Crypto API, natif au navigateur) ───
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray  = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ─── INSCRIPTION ───────────────────────────────────────────────────────────────────
+async function senduser() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!username || !password) {
+        alert("Remplis tous les champs !");
+        return;
+    }
+
+    // 1. On hache le mot de passe côté client AVANT de l'envoyer
+    const hashedPassword = await sha256(password);
+
+    // 2. On envoie au serveur PHP (le mdp en clair ne circule jamais)
+    try {
+        const response = await fetch('../serveur/inscription.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password: hashedPassword })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert("Compte créé ! Tu peux te connecter.");
+            window.location.href = "login.html"; // redirige vers la page de connexion
+        } else {
+            alert("Erreur : " + data.message);
+        }
+    } catch (err) {
+        alert("Impossible de joindre le serveur.");
+        console.error(err);
+    }
+}
+
+// ─── CONNEXION ─────────────────────────────────────────────────────────────────────
+async function login() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!username || !password) {
+        alert("Remplis tous les champs !");
+        return;
+    }
+
+    // 1. Même hachage SHA-256 côté client
+    const hashedPassword = await sha256(password);
+
+    // 2. Envoi au serveur
+    try {
+        const response = await fetch('../serveur/connexion.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password: hashedPassword })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert("Connecté ! Bienvenue " + data.username);
+            window.location.href = "accueil.html";
+        } else {
+            alert("Identifiants incorrects.");
+        }
+    } catch (err) {
+        alert("Impossible de joindre le serveur.");
+        console.error(err);
+    }
+}
