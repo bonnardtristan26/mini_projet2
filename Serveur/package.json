@@ -1,7 +1,6 @@
 {
   "name": "serveur",
   "version": "1.0.0",
-  "description": "",
   "main": "serveur.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,6 +11,7 @@
   "type": "module",
   "dependencies": {
     "express": "^5.2.1",
-    "ws": "^8.19.0"
-  }
+    "ws": "^8.20.0"
+  },
+  "description": ""
 }
