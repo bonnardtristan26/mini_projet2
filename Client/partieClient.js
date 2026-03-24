@@ -119,7 +119,7 @@ function disconnect() {
 
 
 //Création du socket sur l'IP de la machine
-const socket = new WebSocket("ws://10.16.26.17:3000"); //IP à changer selon l'ordinateur sur lequel on lance
+const socket = new WebSocket("ws://192.168.1.70:3000"); //IP à changer selon l'ordinateur sur lequel on lance. //// s'était 10.16.26.17 
 
 const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("messageInput");
@@ -184,7 +184,7 @@ async function senduser() {
 
     // 2. On envoie au serveur PHP (le mdp en clair ne circule jamais)
     try {
-        const response = await fetch('../serveur/inscription.php', {
+        const response = await fetch('/inscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password: hashedPassword })
@@ -219,7 +219,7 @@ async function login() {
 
     // 2. Envoi au serveur
     try {
-        const response = await fetch('../serveur/connexion.php', {
+        const response = await fetch('/connexion', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password: hashedPassword })
@@ -229,7 +229,7 @@ async function login() {
 
         if (data.success) {
             alert("Connecté ! Bienvenue " + data.username);
-            window.location.href = "accueil.html";
+            window.location.href = "chat_general.html";
         } else {
             alert("Identifiants incorrects.");
         }

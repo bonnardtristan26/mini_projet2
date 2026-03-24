@@ -76,6 +76,10 @@ function handleDisconnection() {
 
 //NE PAS OUBLIER DE FAIRE LES COMMENTAIRES POUR EXPLIQUER CHAQUE PARTIES
 
+// ══════════════════════════════════════════════════════════════════════════════════
+// WEBSOCKET — chat (code original intact)
+// ══════════════════════════════════════════════════════════════════════════════════
+
 import express from "express";
 import { WebSocketServer } from "ws";
 import http from "http";
@@ -110,4 +114,78 @@ wss.on("connection", (ws) => {
 
 server.listen(3000, () => {
   console.log("Serveur lancé sur http://localhost:3000");
+});
+
+
+
+//partie chiffrement du mdp 
+
+import bcrypt from "bcrypt";
+import mysql from "mysql2/promise";
+import session from "express-session";
+
+// Lire le JSON envoyé par le client
+app.use(express.json());
+
+// Sessions
+app.use(session({
+    secret: "ladiscorde_secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false }
+}));
+
+// Connexion MariaDB
+const db = await mysql.createPool({
+    host:     "127.0.0.1",
+    port:     3307,          // ← ajoute cette ligne
+    user:     "root",
+    password: "",
+    database: "ladiscorde",
+    waitForConnections: true
+});
+
+console.log("Connecté à MariaDB");
+
+// Servir le dossier Client
+app.use(express.static(path.join(__dirname, "../Client")));
+
+// Servir le dossier Ressource (pour les images, fonts, etc.)
+app.use("/Ressource", express.static(path.join(__dirname, "../Ressource")));
+
+// Route inscription
+app.post("/inscription", async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) return res.json({ success: false, message: "Champs manquants." });
+    if (username.length < 3 || username.length > 30) return res.json({ success: false, message: "Pseudo entre 3 et 30 caractères." });
+    if (!/^[a-f0-9]{64}$/.test(password)) return res.json({ success: false, message: "Format invalide." });
+    try {
+        const [rows] = await db.execute("SELECT id FROM utilisateurs WHERE username = ?", [username]);
+        if (rows.length > 0) return res.json({ success: false, message: "Pseudo déjà pris." });
+        const hashFinal = await bcrypt.hash(password, 12);
+        await db.execute("INSERT INTO utilisateurs (username, password_hash) VALUES (?, ?)", [username, hashFinal]);
+        return res.json({ success: true, message: "Compte créé !" });
+    } catch (err) {
+        console.error("Erreur inscription :", err);
+        return res.json({ success: false, message: "Erreur serveur." });
+    }
+});
+
+// Route connexion
+app.post("/connexion", async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) return res.json({ success: false, message: "Champs manquants." });
+    try {
+        const [rows] = await db.execute("SELECT id, username, password_hash FROM utilisateurs WHERE username = ?", [username]);
+        if (rows.length === 0) return res.json({ success: false, message: "Identifiants incorrects." });
+        const user = rows[0];
+        const ok = await bcrypt.compare(password, user.password_hash);
+        if (!ok) return res.json({ success: false, message: "Identifiants incorrects." });
+        req.session.userId   = user.id;
+        req.session.username = user.username;
+        return res.json({ success: true, username: user.username });
+    } catch (err) {
+        console.error("Erreur connexion :", err);
+        return res.json({ success: false, message: "Erreur serveur." });
+    }
 });
