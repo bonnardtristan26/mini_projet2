@@ -32,6 +32,6 @@ body {
   border-radius: 4px;
   word-wrap: break-word; /* Évite que le texte sorte de la boîte */
   font-family: "LoserMotoClub", sans-serif; /* Pour garder ta police */
-  max-width: 80%;
+  max-width: 30%;
   width: fit-content;
 }
