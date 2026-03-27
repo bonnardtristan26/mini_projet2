@@ -4,3 +4,12 @@ que lors de la creation du compte, le client envoie une requête a Mariadb pour 
 * son mdp et qu'il soit stocker et puis lors de la connection le client envoie son 
 mdp hasher au serveur, le serveur stock le (bcrypt), une fois la connection réussite
 alors il envoie a la page de chat (travaille personnel)
+changement html, mise d'une boite en html, changement du fichier partieclient.js et 
+serveur.js afin que sa envoie les identifiants dans la base de données wamp serveur sur 
+maria db, ajout de plusieurs colonne sur maria db, comme id, username, email, token vérif
+qui permet de généré un token a chaque ajout de compte, et email vérifi qui vérifie si le client
+a cliquer sur le mail pour vérifier le compte, qui est un booléun, il y a un password hash
+et la date de création, j'ai utiliser l'api de "resend" un site qui permet d'envoyer des
+mails avec l'adresse noreply.ladiscorde@gmail.com, je ne pouvais pas le faire avec le mail
+car les ports sont bloqués. le client ne peut pas se connecter tant que son mail n'est pas vérifier
+
