@@ -14,7 +14,8 @@ socket.addEventListener("error", () => {
 });
 
 socket.addEventListener("message", (event) => {
-  const msg = document.createElement("message_div");
+  const msg = document.createElement("div");
+  msg.classList.add("message-bubble");
   msg.textContent = event.data;
   messagesDiv.appendChild(msg);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;

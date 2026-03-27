@@ -24,6 +24,12 @@ body {
   border: 1px solid black;
 }
 
-.message_div {
-    border: 1px solid black;
+.message-bubble {
+  border: 1px solid #C80000; /* La bordure rouge dont on parlait */
+  background-color: #f9f9f9;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  word-wrap: break-word; /* Évite que le texte sorte de la boîte */
+  font-family: "LoserMotoClub", sans-serif; /* Pour garder ta police */
 }
