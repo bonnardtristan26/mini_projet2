@@ -119,7 +119,7 @@ function disconnect() {
 
 
 //Création du socket sur l'IP de la machine
-const socket = new WebSocket("ws://10.16.26.17:3000"); //IP à changer selon l'ordinateur sur lequel on lance.
+const socket = new WebSocket("ws://10.16.25.6:3000"); //IP à changer selon l'ordinateur sur lequel on lance.
 
 const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("messageInput");
