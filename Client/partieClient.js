@@ -1,5 +1,5 @@
 //Création du socket sur l'IP de la machine
-const socket = new WebSocket("ws://10.16.25.6:3000"); //IP à changer selon l'ordinateur sur lequel on lance.
+const socket = new WebSocket("ws://10.16.25.4:3000"); //IP à changer selon l'ordinateur sur lequel on lance.
 
 const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("messageInput");
@@ -14,7 +14,7 @@ socket.addEventListener("error", () => {
 });
 
 socket.addEventListener("message", (event) => {
-  const msg = document.createElement("div");
+  const msg = document.createElement("message_div");
   msg.textContent = event.data;
   messagesDiv.appendChild(msg);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
