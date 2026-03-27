@@ -20,6 +20,6 @@ body {
 
 #messageInput {
   flex: 1;
-  padding: 50px;
-  border: 10px solid red;
+  padding: 10px;
+  border: 1px solid black;
 }
