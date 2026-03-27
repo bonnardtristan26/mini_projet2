@@ -1,73 +1,3 @@
-// Démarrer le serveur
-function startServer() {
-    // 👉 Cette fonction lance ton serveur de chat
-
-    // C’est ici que tu :
-    // - crées ton serveur (Node.js par exemple)
-    // - actives WebSocket
-    // - choisis un port (ex : 3000)
-
-    // 💡 Réflexe à avoir :
-    // le serveur est le “centre” du chat
-    // tous les utilisateurs passent par lui
-
-    // Sans serveur → pas de communication entre utilisateurs
-}
-
-
-// Gérer une nouvelle connexion
-function handleConnection() {
-    // 👉 Cette fonction est appelée quand un utilisateur se connecte
-
-    // À ce moment-là, tu dois :
-    // - ajouter l’utilisateur à une liste (clients connectés)
-    // - préparer la réception de ses messages
-
-    // Tu peux aussi :
-    // - lui donner un identifiant
-    // - prévenir les autres qu’un utilisateur a rejoint
-
-    // 💡 Réflexe à avoir :
-    // toujours garder une trace des utilisateurs connectés
-}
-
-
-// Envoyer un message à tout le monde
-function broadcastMessage() {
-    // 👉 Cette fonction est le cœur du chat
-
-    // Quand un utilisateur envoie un message :
-    // le serveur le reçoit, puis doit le renvoyer à TOUS les autres
-
-    // Tu dois :
-    // - parcourir la liste des clients connectés
-    // - envoyer le message à chacun
-
-    // ⚠️ Important :
-    // ne pas renvoyer seulement à un utilisateur → sinon ce n’est pas un chat
-
-    // 💡 Réflexe à avoir :
-    // le serveur = “diffuseur” (comme une radio)
-}
-
-
-// Gérer une déconnexion
-function handleDisconnection() {
-    // 👉 Cette fonction est appelée quand un utilisateur quitte
-
-    // Tu dois :
-    // - retirer l’utilisateur de la liste des clients
-    // - libérer les ressources (nettoyage)
-
-    // Tu peux aussi :
-    // - informer les autres utilisateurs (message "leave")
-
-    // 💡 Réflexe à avoir :
-    // toujours nettoyer les connexions pour éviter :
-    // - bugs
-    // - utilisateurs “fantômes”
-}
-
 //ATTENTION : COMMANDES A EXECUTER POUR LANCER LE SERVEUR (a executer dans l'invite de commande, dans le dossier Serveur)
 
 //npm init -y
@@ -85,6 +15,8 @@ import { WebSocketServer } from "ws";
 import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
+
+import { Resend } from "resend";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -147,38 +79,169 @@ const db = await mysql.createPool({
 
 console.log("Connecté à MariaDB");
 
+// ── Config Gmail ───────────────────────────────────────────────────────────────────
+const resend = new Resend("re_Qsmd38EP_Fr49rm6r7KX84TyWGQnMiJhJ");
+
 // Servir le dossier Client
 app.use(express.static(path.join(__dirname, "../Client")));
 
 // Servir le dossier Ressource (pour les images, fonts, etc.)
 app.use("/Ressource", express.static(path.join(__dirname, "../Ressource")));
 
-// Route inscription
+// Route inscription en gros pour envoyer mail
+
 app.post("/inscription", async (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password) return res.json({ success: false, message: "Champs manquants." });
+    const { username, password, email } = req.body;
+
+    if (!username || !password || !email) return res.json({ success: false, message: "Champs manquants." });
     if (username.length < 3 || username.length > 30) return res.json({ success: false, message: "Pseudo entre 3 et 30 caractères." });
     if (!/^[a-f0-9]{64}$/.test(password)) return res.json({ success: false, message: "Format invalide." });
+    if (!email.includes('@')) return res.json({ success: false, message: "Email invalide." });
+
     try {
-        const [rows] = await db.execute("SELECT id FROM utilisateurs WHERE username = ?", [username]);
-        if (rows.length > 0) return res.json({ success: false, message: "Pseudo déjà pris." });
+        // Vérifier doublon pseudo ou email
+        const [rows] = await db.execute(
+            "SELECT id FROM utilisateurs WHERE username = ? OR email = ?", [username, email]
+        );
+        if (rows.length > 0) return res.json({ success: false, message: "Pseudo ou email déjà utilisé." });
+
+        // Générer un token de vérification unique
+        const token = crypto.randomUUID().replace(/-/g, '');
+
         const hashFinal = await bcrypt.hash(password, 12);
-        await db.execute("INSERT INTO utilisateurs (username, password_hash) VALUES (?, ?)", [username, hashFinal]);
-        return res.json({ success: true, message: "Compte créé !" });
+        await db.execute(
+            "INSERT INTO utilisateurs (username, password_hash, email, token_verif, email_verifie) VALUES (?, ?, ?, ?, 0)",
+            [username, hashFinal, email, token]
+        );
+
+        // Lien de vérification
+        const lienVerif = `http://localhost:3000/verifier-email?token=${token}`;
+
+        // Template HTML du mail style Discord/LaDiscorde
+        const htmlMail = `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="UTF-8"></head>
+        <body style="margin:0;padding:0;background:#0d0d0d;font-family:Arial,sans-serif;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d0d;padding:40px 0;">
+                <tr><td align="center">
+                    <table width="480" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:12px;border:1px solid rgba(200,0,0,0.4);overflow:hidden;">
+                        
+                        <!-- Header rouge -->
+                        <tr>
+                            <td style="background:linear-gradient(135deg,#8b0000,#c0000e);padding:32px;text-align:center;">
+                                <h1 style="color:white;margin:0;font-size:28px;letter-spacing:3px;">LaDiscorde</h1>
+                                <p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:13px;letter-spacing:1px;">PLATEFORME DE CHAT</p>
+                            </td>
+                        </tr>
+
+                        <!-- Corps -->
+                        <tr>
+                            <td style="padding:36px 40px;">
+                                <h2 style="color:white;font-size:20px;margin:0 0 12px;">Vérifie ton adresse email</h2>
+                                <p style="color:#aaa;font-size:14px;line-height:1.6;margin:0 0 24px;">
+                                    Salut <strong style="color:white;">${username}</strong> !<br><br>
+                                    Merci de t'être inscrit sur <strong style="color:#c0000e;">LaDiscorde</strong>.
+                                    Clique sur le bouton ci-dessous pour confirmer ton adresse email et activer ton compte.
+                                </p>
+
+                                <!-- Bouton -->
+                                <table cellpadding="0" cellspacing="0" style="margin:0 auto 28px;">
+                                    <tr>
+                                        <td style="background:#c0000e;border-radius:8px;">
+                                            <a href="${lienVerif}" style="display:inline-block;padding:14px 36px;color:white;text-decoration:none;font-weight:bold;font-size:15px;letter-spacing:1.5px;">
+                                                VÉRIFIER MON EMAIL
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <p style="color:#666;font-size:12px;text-align:center;margin:0;">
+                                    Ce lien expire dans 24h. Si tu n'as pas créé de compte, ignore ce mail.
+                                </p>
+                            </td>
+                        </tr>
+
+                        <!-- Footer -->
+                        <tr>
+                            <td style="background:#111;padding:18px;text-align:center;border-top:1px solid rgba(200,0,0,0.2);">
+                                <p style="color:#444;font-size:11px;margin:0;">
+                                    © LaDiscorde — noreply.ladiscorde@gmail.com
+                                </p>
+                            </td>
+                        </tr>
+
+                    </table>
+                </td></tr>
+            </table>
+        </body>
+        </html>`;
+
+        // Envoi du mail
+        await resend.emails.send({
+            from: "LaDiscorde <onboarding@resend.dev>",
+            to: email,
+            subject: "Vérifie ton adresse email — LaDiscorde",
+            html: htmlMail
+        });
+
+        console.log(`Mail de vérification envoyé à : ${email} (user: ${username})`);
+        return res.json({ success: true, message: "Compte créé ! Vérifie tes emails." });
+
     } catch (err) {
         console.error("Erreur inscription :", err);
         return res.json({ success: false, message: "Erreur serveur." });
     }
 });
 
+// Route vérification email
+app.get("/verifier-email", async (req, res) => {
+    const { token } = req.query;
+
+    if (!token) return res.send("Lien invalide.");
+
+    try {
+        const [rows] = await db.execute(
+            "SELECT id, username FROM utilisateurs WHERE token_verif = ? AND email_verifie = 0",
+            [token]
+        );
+
+        if (rows.length === 0) {
+            return res.send("Lien invalide ou déjà utilisé.");
+        }
+
+        await db.execute(
+            "UPDATE utilisateurs SET email_verifie = 1, token_verif = NULL WHERE id = ?",
+            [rows[0].id]
+        );
+
+        console.log(`Email vérifié pour : ${rows[0].username}`);
+        // Redirige vers la page de connexion avec un message
+        return res.redirect("/login.html?verified=1");
+
+    } catch (err) {
+        console.error("Erreur vérification :", err);
+        return res.send("Erreur serveur.");
+    }
+});
+
+
+
 // Route connexion
 app.post("/connexion", async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.json({ success: false, message: "Champs manquants." });
     try {
-        const [rows] = await db.execute("SELECT id, username, password_hash FROM utilisateurs WHERE username = ?", [username]);
+        const [rows] = await db.execute("SELECT id, username, password_hash, email_verifie FROM utilisateurs WHERE username = ?", [username]);
         if (rows.length === 0) return res.json({ success: false, message: "Identifiants incorrects." });
+        
         const user = rows[0];
+
+        // Vérifier que l'email a bien été confirmé
+        if (user.email_verifie === 0) {
+            return res.json({ success: false, message: "Vérifie ton email avant de te connecter." });
+        }
+
         const ok = await bcrypt.compare(password, user.password_hash);
         if (!ok) return res.json({ success: false, message: "Identifiants incorrects." });
         req.session.userId   = user.id;
@@ -188,4 +251,5 @@ app.post("/connexion", async (req, res) => {
         console.error("Erreur connexion :", err);
         return res.json({ success: false, message: "Erreur serveur." });
     }
+    
 });
