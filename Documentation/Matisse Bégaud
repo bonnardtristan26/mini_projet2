@@ -1,1 +1,6 @@
-J'ai pu faire le diagramme de classe, repasser sur le logo LaDiscorde (4H), et repasser sur les IHM, j'ai pu commencer a faire les fichiers HTML client (créer un compte) (4H)
+J'ai pu faire le diagramme de classe, repasser sur le logo LaDiscorde (4H), et repasser
+sur les IHM, j'ai pu commencer a faire les fichiers HTML client (créer un compte) (4H), ajout des fichiers php et modification du fichier javascript serveur et client afin
+que lors de la creation du compte, le client envoie une requête a Mariadb pour hasher
+* son mdp et qu'il soit stocker et puis lors de la connection le client envoie son 
+mdp hasher au serveur, le serveur stock le (bcrypt), une fois la connection réussite
+alors il envoie a la page de chat (travaille personnel)

@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- ANIMATED LOGO — fichier à la racine du repo -->
-<img src="Ressource/Image/logo_animated.svg" width="180" alt="LaDiscorde Logo"/>
+<img src="Ressource/Image/logo_LaDiscorde_animated.svg" width="180" alt="LaDiscorde Logo"/>
 
 <br/>
 
@@ -63,14 +63,56 @@ créer un espace **puissant, ouvert et accessible** pour discuter, collaborer et
 ```
 LaDiscorde/
 │
-├── 📄 HTML.html
-├── 🎨 CSS.css
-├── 🟨 partieClient.js
-├── 🟨 serveur.js
+├── 📁 Client/
+│   ├── 🎨 chat_general.css
+│   ├── 📄 chat_general.html
+│   ├── 📄 inscription.html
+│   ├── ⚙️ launch.json
+│   ├── 📄 login.html
+│   └── 🟨 partieClient.js
 │
-├── 📁 assets/
-│   └── 🖼️  logo_animated.svg
-│   └── (images, icônes, médias)
+├── 📁 Documentation/
+│   ├── 📄 Julian chedotal
+│   ├── 📄 Matisse Bégaud
+│   └── 📄 Tristan Bonnard
+│
+├── 📁 Planification/
+│   ├── 📄 cahier_des_charges_G1.docx
+│   └── 📊 Planning miniProjet.xlsx
+│
+├── 📁 Ressource/
+│   ├── 📁 Audio/
+│   │   └── 📁 Playlist/
+│   │       └── 🎵 OneHourofSovietmusicforGaming2019...
+│   │
+│   ├── 📁 Front/
+│   │   ├── 🔤 DhCalcoins.ttf
+│   │   ├── 🔤 DRExclusiveEditorial.ttf
+│   │   ├── 🔤 LoserMotoClub.ttf
+│   │   └── 🔤 NexlineDemoRegular.otf
+│   │
+│   ├── 📁 Image/
+│   │   ├── 🖼️ fond_LaDiscorde.png
+│   │   ├── 🖼️ logo_animated.svg
+│   │   ├── 🖼️ logo_LaDiscorde_animated.svg
+│   │   ├── 🎞️ logo_LaDiscorde.mp4
+│   │   └── 🖼️ logo_LaDiscorde.png
+│   │
+│   └── 📁 Video/
+│       └── 🎞️ logo_LaDiscorde.mp4
+│
+├── 📁 Serveur/
+│   ├── 📁 Accueil/
+│   │   ├── 🐘 connexion.php
+│   │   └── 🐘 inscription.php
+│   │
+│   ├── 📁 BDD/
+│   │   └── 🗄️ bdd.sql
+│   │
+│   ├── 📦 node_modules/
+│   ├── ⚙️ package-lock.json
+│   ├── ⚙️ package.json
+│   └── 🟨 serveur.js
 │
 └── 📖 README.md
 ```
@@ -81,12 +123,12 @@ LaDiscorde/
 
 <div align="center">
 
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![HTML](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![NodeJS](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![WebSocket](https://img.shields.io/badge/WebSocket-010101?style=for-the-badge&logo=socket.io&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
 </div>
 

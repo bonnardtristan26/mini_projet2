@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>LaDiscorde & crée notre compte !</title>
+    <title>LaDiscorde & connecte toi !</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -44,19 +44,21 @@ body {
     <img src="../Ressource/Image/logo_LaDiscorde.png" alt="le logo de LaDiscorde" style="width: 300px; height: auto;"/>
     <p style="font-size: 18px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; margin: 14px 0 18px;">SE CONNECTER</p>
     <div id="logincreatecompte" style="text-align: center;">
+        <input type="text" id="email" placeholder="Entrer votre email"><br>
         <input type="text" id="username" placeholder="Entrer un nom d'utilisateur"><BR>
         <input type="text" id="password" placeholder="Créer un mot de passe"><BR>
-        <button onclick="senduser()">Inscription</button><BR><BR>
-        <a id="connection" data-testid="connection" href="https://sevetys.fr/conseils-veterinaires/chat/race-de-chats/europeen-european-shorthair/">Mot de passe oublié ?</a>
+        <button onclick="login()">Connexion</button><BR><BR>
+        <a id="connection" data-testid="connection" href="https://tinyurl.com/resetmdp">Mot de passe oublié ?</a><BR>
+        <a id="retourinscription" data-testid="retourinscription" href="inscription.html">Vous n'avez pas de compte ?</a>
     </div>
   </div>
 </div>
 
 <!-- BARRE DU BAS -->
 <div style="position: fixed; bottom: 0; left: 0; width: 100%; height: 40px; background: rgba(10,10,10,0.90); border-top: 1px solid rgba(200,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 100;">
-  <p style="color: rgba(200,200,200,0.7); font-size: 14px; margin: 0;">Créer un compte</p>
+  <p style="color: rgba(200,200,200,0.7); font-size: 14px; margin: 0;">Connecter vous a votre compte</p>
 </div>
 
-<script src="script.js"></script>
+<script src="partieClient.js"></script>
 </body>
 </html>
