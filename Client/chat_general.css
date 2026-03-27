@@ -23,3 +23,7 @@ body {
   padding: 10px;
   border: 1px solid black;
 }
+
+.message_div {
+    border: 1px solid black;
+}
