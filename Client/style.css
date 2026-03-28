@@ -156,12 +156,21 @@ body {
     animation: fadeIn 0.5s ease;
 }
 
-/* Grid layout for menu principal cards */
-body:not(.login-page):not(.signup-page) .content {
+/* Grid layout for menu principal cards - NOT login/signup */
+.content:not(.login-page):not(.signup-page) {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     justify-content: auto;
     align-items: auto;
+}
+
+/* Centrage des formulaires de connexion/inscription */
+.content.login-page,
+.content.signup-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 @keyframes fadeIn {
@@ -741,5 +750,3 @@ body.chat-body {
     z-index: 200;
 }
 .bottombar p { color: rgba(200,200,200,0.6); font-size: 13px; }
-
-/* ═══════════════════════════════════════════════════════════════════════════════ */
