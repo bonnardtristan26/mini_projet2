@@ -11,5 +11,9 @@ qui permet de généré un token a chaque ajout de compte, et email vérifi qui 
 a cliquer sur le mail pour vérifier le compte, qui est un booléun, il y a un password hash
 et la date de création, j'ai utiliser l'api de "resend" un site qui permet d'envoyer des
 mails avec l'adresse noreply.ladiscorde@gmail.com, je ne pouvais pas le faire avec le mail
-car les ports sont bloqués. le client ne peut pas se connecter tant que son mail n'est pas vérifier
-
+car les ports sont bloqués. le client ne peut pas se connecter tant que son mail n'est pas vérifier (4h)
+corriger le problème lié au push, j'ai corriger le problème d'accès a chatgénérale que julian avait fais 
+mais marchait plus avec le push, il y a maintenant un système de cookie de connection, j'ai fais le html de
+chat générale les échanges sont séparer avec le nom d'utilisateur et celui qui envoie le message est a droite
+alors que si on reçoit un message il est a gauche, avec le fond "la discorde", j'ai corriger le système d'envoie 
+de mail avec "brevo" un site qui permet d'envoyer des mails, et de vérifier le compte
