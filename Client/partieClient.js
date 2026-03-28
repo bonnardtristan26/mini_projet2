@@ -1,29 +1,39 @@
-//Création du socket sur l'IP de la machine
-const socket = new WebSocket("ws://192.168.56.1:3000"); //IP à changer selon l'ordinateur sur lequel on lance.
+const socket = new WebSocket(`ws://${window.location.hostname}:3000`);
 
 const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
 
-socket.addEventListener("open", () => {
-  console.log("Connecté au serveur WebSocket");
-});
+let monPseudo = "";
+fetch('/verifier-session')
+  .then(r => r.json())
+  .then(data => { if (data.connecte) monPseudo = data.username; });
 
-socket.addEventListener("error", () => {
-  console.log("Erreur WebSocket !");
-});
+socket.addEventListener("open", () => console.log("Connecté au serveur WebSocket"));
+socket.addEventListener("error", () => console.log("Erreur WebSocket !"));
 
+//pour les box de texte
 socket.addEventListener("message", (event) => {
-  const msg = document.createElement("div");
-  msg.classList.add("message-bubble");
-  msg.textContent = event.data;
-  messagesDiv.appendChild(msg);
+  let data;
+  try { data = JSON.parse(event.data); }
+  catch { data = { pseudo: "Inconnu", texte: event.data }; }
+
+  const estMoi = data.pseudo === monPseudo;
+  const div = document.createElement("div");
+  div.classList.add("message-row");
+  div.classList.add(estMoi ? "moi" : "autre");
+
+  div.innerHTML = `
+    <div class="msg-pseudo">${data.pseudo}</div>
+    <div class="msg-bubble">${data.texte}</div>`;
+
+  messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
 
 sendBtn.addEventListener("click", () => {
   if (input.value.trim() !== "") {
-    socket.send(input.value);
+    socket.send(JSON.stringify({ pseudo: monPseudo, texte: input.value.trim() }));
     input.value = "";
   }
 });
@@ -84,9 +94,8 @@ async function senduser() {
 async function login() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
-    const email    = document.getElementById('email').value.trim();
 
-    if (!username || !password || !email) {
+    if (!username || !password) {
         alert("Remplis tous les champs !");
         return;
     }
@@ -99,7 +108,7 @@ async function login() {
         const response = await fetch('/connexion', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password: hashedPassword, email }) 
+            body: JSON.stringify({ username, password: hashedPassword}) 
         });
 
         const data = await response.json();

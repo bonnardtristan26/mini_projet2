@@ -16,7 +16,7 @@ import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,8 +79,17 @@ const db = await mysql.createPool({
 
 console.log("Connecté à MariaDB");
 
-// ── Config Gmail ───────────────────────────────────────────────────────────────────
-const resend = new Resend("re_Qsmd38EP_Fr49rm6r7KX84TyWGQnMiJhJ");
+// ── Config Gmail Brevo 
+
+const transporter = nodemailer.createTransport({
+    host: "smtp-relay.brevo.com",
+    port: 587,
+    secure: false,
+    auth: {
+        user: "a658f1001@smtp-brevo.com",  // ton email Brevo
+        pass: "xsmtpsib-df59dfe619649d0cc7f1ab0329ea9570e3ba19cc41245f64c50836e10d2e8d9f-V4wYuTmaroPTPWDN"             // la clé API Brevo (pas le mdp Gmail)
+    }
+});
 
 // Servir le dossier Client
 app.use(express.static(path.join(__dirname, "../Client")));
@@ -177,13 +186,13 @@ app.post("/inscription", async (req, res) => {
         </body>
         </html>`;
 
-        // Envoi du mail
-        await resend.emails.send({
-            from: "LaDiscorde <onboarding@resend.dev>",
-            to: email,
-            subject: "Vérifie ton adresse email — LaDiscorde",
-            html: htmlMail
-        });
+//en voie mail
+await transporter.sendMail({
+    from: '"LaDiscorde" <ztoxyu@gmail.com>',
+    to: email,
+    subject: "Vérifie ton adresse email — LaDiscorde",
+    html: htmlMail
+});
 
         console.log(`Mail de vérification envoyé à : ${email} (user: ${username})`);
         return res.json({ success: true, message: "Compte créé ! Vérifie tes emails." });
@@ -253,3 +262,21 @@ app.post("/connexion", async (req, res) => {
     }
     
 });
+
+
+// Route pour vérifier si l'utilisateur est connecté
+app.get("/verifier-session", (req, res) => {
+    if (req.session.userId) {
+        return res.json({ connecte: true, username: req.session.username });
+    } else {
+        return res.json({ connecte: false });
+    }
+});
+
+// Route déconnexion
+app.post("/deconnexion", (req, res) => {
+    req.session.destroy(() => {
+        res.json({ success: true });
+    });
+});
+

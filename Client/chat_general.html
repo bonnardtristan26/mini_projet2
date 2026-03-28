@@ -4,36 +4,300 @@
   <meta charset="UTF-8">
   <title>Chat WebSocket</title>
   <link rel="stylesheet" href="chat_general.css">
+  <style>
+    @font-face { font-family: "LoserMotoClub"; src: url('/Ressource/Front/LoserMotoClub.ttf'); }
+    @font-face { font-family: "MaPolice"; src: url('/Ressource/Front/DRExclusiveEditorial.ttf'); }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "MaPolice", sans-serif;
+      background: #111214;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── BARRE DU HAUT ── */
+    .topbar {
+      position: fixed; top: 0; left: 0; width: 100%; height: 40px;
+      background: rgba(10,10,10,0.95);
+      border-bottom: 1px solid rgba(200,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200;
+    }
+    .topbar .app-title {
+      font-family: "LoserMotoClub", sans-serif;
+      font-size: 18px; letter-spacing: 2px; color: white;
+    }
+    .topbar img { width: 26px; height: auto; position: absolute; right: 16px; }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      height: 100vh;
+      padding-top: 40px;
+      padding-bottom: 40px;
+    }
+
+    /* ── SERVEURS ── */
+    .servers {
+      width: 60px;
+      background: #0e0e0f;
+      border-right: 1px solid rgba(200,0,0,0.15);
+      display: flex; flex-direction: column; align-items: center;
+      padding: 12px 0; gap: 10px; overflow-y: auto;
+    }
+    .server-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: #1a1a1c;
+      border: 1px solid rgba(200,0,0,0.3);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .server-icon:hover, .server-icon.active {
+      border-color: rgba(200,0,0,0.8);
+      background: rgba(180,0,0,0.2);
+    }
+    .server-icon img { width: 28px; height: 28px; border-radius: 50%; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 200px;
+      background: #161618;
+      border-right: 1px solid rgba(200,0,0,0.15);
+      display: flex; flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(200,0,0,0.15);
+      font-size: 11px; font-weight: bold; letter-spacing: 1px;
+      color: rgba(200,200,200,0.5);
+      text-transform: uppercase;
+    }
+    .sidebar-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .channel-item {
+      padding: 7px 14px; cursor: pointer; font-size: 13px;
+      color: rgba(180,180,180,0.6);
+      display: flex; align-items: center; gap: 8px;
+      border-radius: 4px; margin: 0 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .channel-item:hover { background: rgba(200,0,0,0.1); color: white; }
+    .channel-item.active { background: rgba(200,0,0,0.15); color: #ff4444; }
+
+    .sidebar-footer {
+      padding: 10px 12px;
+      border-top: 1px solid rgba(200,0,0,0.15);
+      display: flex; align-items: center; gap: 8px;
+      background: #111213;
+    }
+    .sidebar-footer .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(200,0,0,0.25);
+      border: 1px solid rgba(200,0,0,0.4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .sidebar-footer .pseudo {
+      font-size: 12px; color: white; flex: 1;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .btn-deco {
+      background: none; border: none; cursor: pointer;
+      color: rgba(200,0,0,0.6); font-size: 18px;
+      transition: color 0.2s; padding: 4px;
+    }
+    .btn-deco:hover { color: #ff2222; }
+
+    /* ── ZONE CHAT ── */
+      .chat-zone {
+        flex: 1; display: flex; flex-direction: column;
+        background-color: #18191c;
+        background-image: url('/Ressource/Image/fond_LaDiscorde.png');
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center 20%;
+      }
+    .chat-header {
+      padding: 10px 18px;
+      border-bottom: 1px solid rgba(200,0,0,0.2);
+      background: #111213;
+      font-size: 14px; color: rgba(200,200,200,0.8);
+      letter-spacing: 1px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .chat-header span { color: rgba(200,0,0,0.7); font-size: 16px; }
+
+    /* ── MESSAGES ── */
+    #messages {
+      flex: 1; overflow-y: auto;
+      padding: 20px 24px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    #messages::-webkit-scrollbar { width: 4px; }
+    #messages::-webkit-scrollbar-thumb { background: rgba(200,0,0,0.25); border-radius: 4px; }
+
+    .message-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 70%;
+      animation: fadeIn 0.18s ease;
+    }
+    .message-row.moi { align-self: flex-end; align-items: flex-end; }
+    .message-row.autre { align-self: flex-start; align-items: flex-start; }
+
+    @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; } }
+
+    .msg-pseudo {
+      font-size: 11px;
+      margin-bottom: 3px;
+      padding: 0 4px;
+    }
+    .message-row.moi .msg-pseudo { color: rgba(200,0,0,0.75); }
+    .message-row.autre .msg-pseudo { color: rgba(180,180,180,0.6); }
+
+    .msg-bubble {
+      padding: 10px 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    /* Bulle reçue — gauche */
+    .message-row.autre .msg-bubble {
+      background: #222326;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 4px 16px 16px 16px;
+      color: #d8d8d8;
+    }
+    /* Bulle envoyée — droite */
+    .message-row.moi .msg-bubble {
+      background: #3d0008;
+      border: 1px solid rgba(200,0,0,0.35);
+      border-radius: 16px 4px 16px 16px;
+      color: #f0d0d0;
+    }
+
+    /* ── ZONE SAISIE ── */
+    #input-zone {
+      padding: 14px 20px;
+      background: #111213;
+      border-top: 1px solid rgba(200,0,0,0.2);
+      display: flex; gap: 10px; align-items: center;
+    }
+    #messageInput {
+      flex: 1; padding: 11px 16px;
+      background: #222326;
+      border: 1px solid rgba(200,0,0,0.25);
+      border-radius: 8px; color: white;
+      font-family: "MaPolice", sans-serif; font-size: 14px;
+      outline: none; transition: border-color 0.2s;
+    }
+    #messageInput:focus { border-color: rgba(200,0,0,0.6); }
+    #messageInput::placeholder { color: rgba(150,150,150,0.4); }
+    #sendBtn {
+      padding: 11px 24px;
+      background: #c0000e; border: none; border-radius: 8px;
+      color: white; font-family: "MaPolice", sans-serif;
+      font-size: 13px; font-weight: bold; letter-spacing: 1px;
+      cursor: pointer; transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    #sendBtn:hover { background: #e0001a; }
+    #sendBtn:active { transform: scale(0.97); }
+
+    /* ── BARRE DU BAS ── */
+    .bottombar {
+      position: fixed; bottom: 0; left: 0; width: 100%; height: 40px;
+      background: rgba(10,10,10,0.95);
+      border-top: 1px solid rgba(200,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 200;
+    }
+    .bottombar p { color: rgba(200,200,200,0.6); font-size: 13px; }
+  </style>
 </head>
 <body>
 
-<style>
-@font-face {
-  font-family: "LoserMotoClub";
-  src: url('../Ressource/Front/LoserMotoClub.ttf');
-}
-.titre {
-  font-family: "LoserMotoClub", sans-serif;
-}
-</style>
+  <!-- BARRE DU HAUT -->
+  <header class="topbar">
+    <p class="app-title">LaDiscorde</p>
+    <img src="/Ressource/Image/logo_LaDiscorde.png" alt="Logo LaDiscorde">
+  </header>
 
-<!-- BARRE DU HAUT -->
-<div style="position: fixed; top: 0; left: 0; width: 100%; height: 40px; background: rgba(10,10,10,0.90); 
-border-bottom: 1px solid rgba(200,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 100;">
-  <p class="title" style="font-size: 18px; margin: 0; color: white; letter-spacing: 2px;">LaDiscorde</p>
-  <img src="../Ressource/Image/logo_LaDiscorde.png" style="width: 26px; height: auto; position: absolute; right: 16px;" alt="Logo LaDiscorde">
-</div>
+  <div class="layout">
 
-<h1 class="titre" style="font-size: 18px; margin: 0; color: black; letter-spacing: 0px;">Chat en ligne</h1>
+    <!-- COLONNE SERVEURS -->
+    <nav class="servers">
+      <div class="server-icon active" title="Chat général">
+        <img src="/Ressource/Image/logo_LaDiscorde.png" alt="LaDiscorde">
+      </div>
+      <div class="server-icon" title="Serveur 2">🎮</div>
+      <div class="server-icon" title="Serveur 3">🔥</div>
+      <div class="server-icon" title="Ajouter" style="font-size:20px;color:rgba(200,0,0,0.5);">+</div>
+    </nav>
 
-<div id="messages"></div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">Canaux</div>
+      <div class="sidebar-list">
+        <div class="channel-item active">💬 général</div>
+        <div class="channel-item">📢 annonces</div>
+        <div class="channel-item">🎮 gaming</div>
+        <div class="sidebar-header" style="margin-top:10px;">Messages privés</div>
+        <div class="channel-item">👤 MP 1</div>
+        <div class="channel-item">👤 MP 2</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="avatar">👤</div>
+        <span class="pseudo" id="pseudo-connecte">...</span>
+        <button class="btn-deco" onclick="deconnecter()" title="Se déconnecter">⏻</button>
+      </div>
+    </aside>
 
-<div id="input-zone">
-  <input type="text" id="messageInput" placeholder="Écris un message..." class="texts" style="font-size: 15px; margin: 0; color: black; letter-spacing: 0px;">
-  <button id="sendBtn" class="title">Envoyer</button>
-</div>
+    <!-- ZONE CHAT -->
+    <main class="chat-zone">
+      <div class="chat-header">
+        <span>#</span> général
+      </div>
+      <div id="messages"></div>
+      <div id="input-zone">
+        <input type="text" id="messageInput" placeholder="Écris un message dans #général...">
+        <button id="sendBtn" class="title">Envoyer</button>
+      </div>
+    </main>
 
-<script src="partieClient.js"></script>
+  </div>
+
+  <!-- BARRE DU BAS -->
+  <footer class="bottombar">
+    <p>Chat général — LaDiscorde</p>
+  </footer>
+
+  <script>
+    // Vérification session
+    fetch('/verifier-session')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.connecte) {
+          window.location.href = "login.html";
+        } else {
+          document.getElementById('pseudo-connecte').textContent = data.username;
+        }
+      });
+
+    // Déconnexion
+    async function deconnecter() {
+      await fetch('/deconnexion', { method: 'POST' });
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <script src="partieClient.js"></script>
+
 </body>
 </html>
-
