@@ -623,28 +623,58 @@ body.chat-body {
 .channel-item.active { background: rgba(200,0,0,0.15); color: #ff4444; }
 
 .sidebar-footer {
-    padding: 10px 12px;
-    border-top: 1px solid rgba(200,0,0,0.15);
-    display: flex; align-items: center; gap: 8px;
-    background: #111213;
+    position: fixed;
+    bottom: 50px;
+    left: 0;
+    padding: 12px 16px;
+    border-radius: 0 12px 12px 0;
+    border: 1px solid rgba(200,0,0,0.3);
+    border-left: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(90deg, rgba(20, 10, 10, 0.95) 0%, rgba(30, 15, 15, 0.95) 100%);
+    z-index: 300;
+    box-shadow: 0 0 20px rgba(200, 0, 0, 0.2);
 }
 .sidebar-footer .avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: rgba(200,0,0,0.25);
-    border: 1px solid rgba(200,0,0,0.4);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(200,0,0,0.4), rgba(255,0,0,0.3));
+    border: 2px solid rgba(255,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
 }
 .sidebar-footer .pseudo {
-    font-size: 12px; color: white; flex: 1;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-size: 13px;
+    color: white;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 80px;
 }
 .btn-deco {
-    background: none; border: none; cursor: pointer;
-    color: rgba(200,0,0,0.6); font-size: 18px;
-    transition: color 0.2s; padding: 4px;
+    background: rgba(200,0,0,0.3);
+    border: 1px solid rgba(200,0,0,0.5);
+    cursor: pointer;
+    color: rgba(255,0,0,0.8);
+    font-size: 18px;
+    transition: all 0.3s ease;
+    padding: 8px;
+    border-radius: 6px;
+    flex-shrink: 0;
 }
-.btn-deco:hover { color: #ff2222; }
+.btn-deco:hover {
+    color: white;
+    background: rgba(200,0,0,0.6);
+    border-color: rgba(255,0,0,0.9);
+    box-shadow: 0 0 15px rgba(255,0,0,0.4);
+}
 
 /* ── ZONE CHAT ── */
 .chat-zone {
