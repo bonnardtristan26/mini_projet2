@@ -1,5 +1,5 @@
 //Création du socket sur l'IP de la machine
-const socket = new WebSocket("ws://192.168.1.187:3000"); //IP à changer selon l'ordinateur sur lequel on lance.
+const socket = new WebSocket("ws://192.168.56.1:3000"); //IP à changer selon l'ordinateur sur lequel on lance.
 
 const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("messageInput");
