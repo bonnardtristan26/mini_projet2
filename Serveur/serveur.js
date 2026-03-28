@@ -7,7 +7,7 @@
 //NE PAS OUBLIER DE FAIRE LES COMMENTAIRES POUR EXPLIQUER CHAQUE PARTIES
 
 // ══════════════════════════════════════════════════════════════════════════════════
-// WEBSOCKET — chat (code original intact)
+// IMPORTS
 // ══════════════════════════════════════════════════════════════════════════════════
 
 import express from "express";
@@ -15,46 +15,21 @@ import { WebSocketServer } from "ws";
 import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
-
+import crypto from "crypto";
+import bcrypt from "bcrypt";
+import mysql from "mysql2/promise";
+import session from "express-session";
 import nodemailer from "nodemailer";
+
+// ══════════════════════════════════════════════════════════════════════════════════
+// CONFIGURATION DE BASE
+// ══════════════════════════════════════════════════════════════════════════════════
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
-
-// Servir le dossier Client
-app.use(express.static(path.join(__dirname, "../Client")));
-
-const wss = new WebSocketServer({ server });
-
-wss.on("connection", (ws) => {
-  console.log("Client connecté");
-
-  ws.on("message", (message) => {
-    console.log("Message reçu :", message.toString());
-
-    // Diffusion à tous les clients
-    wss.clients.forEach((client) => {
-      if (client.readyState === ws.OPEN) {
-        client.send(message.toString());
-      }
-    });
-  });
-});
-
-server.listen(3000, () => {
-  console.log("Serveur lancé sur http://localhost:3000");
-});
-
-
-
-//partie chiffrement du mdp 
-
-import bcrypt from "bcrypt";
-import mysql from "mysql2/promise";
-import session from "express-session";
 
 // Lire le JSON envoyé par le client
 app.use(express.json());
@@ -67,10 +42,16 @@ app.use(session({
     cookie: { secure: false }
 }));
 
+// Servir le dossier Client
+app.use(express.static(path.join(__dirname, "../Client")));
+
+// Servir le dossier Ressource (pour les images, fonts, etc.)
+app.use("/Ressource", express.static(path.join(__dirname, "../Ressource")));
+
 // Connexion MariaDB
 const db = await mysql.createPool({
     host:     "127.0.0.1",
-    port:     3307,          // ← ajoute cette ligne
+    port:     3307,
     user:     "root",
     password: "",
     database: "ladiscorde",
@@ -80,22 +61,69 @@ const db = await mysql.createPool({
 console.log("Connecté à MariaDB");
 
 // ── Config Gmail Brevo 
-
 const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
     port: 587,
     secure: false,
     auth: {
-        user: "a658f1001@smtp-brevo.com",  // ton email Brevo
-        pass: "xsmtpsib-df59dfe619649d0cc7f1ab0329ea9570e3ba19cc41245f64c50836e10d2e8d9f-V4wYuTmaroPTPWDN"             // la clé API Brevo (pas le mdp Gmail)
+        user: "a658f1001@smtp-brevo.com",
+        pass: "xsmtpsib-df59dfe619649d0cc7f1ab0329ea9570e3ba19cc41245f64c50836e10d2e8d9f-V4wYuTmaroPTPWDN"
     }
 });
 
-// Servir le dossier Client
-app.use(express.static(path.join(__dirname, "../Client")));
+// ══════════════════════════════════════════════════════════════════════════════════
+// WEBSOCKET — chat
+// ══════════════════════════════════════════════════════════════════════════════════
 
-// Servir le dossier Ressource (pour les images, fonts, etc.)
-app.use("/Ressource", express.static(path.join(__dirname, "../Ressource")));
+const wss = new WebSocketServer({ server });
+
+// Map pour tracker les clients connectés avec leur session
+const clientSessions = new Map();
+
+wss.on("connection", (ws) => {
+  console.log("Client connecté");
+  
+  // Récupérer les infos de session du client (envoyées à la connexion)
+  ws.on("message", async (message) => {
+    console.log("Message reçu :", message.toString());
+    
+    try {
+      const data = JSON.parse(message.toString());
+      
+      // Si c'est un message avec canal et type
+      if (data.pseudo && data.texte && data.canal && data.type && data.userId) {
+        // Sauvegarder dans la BDD
+        await db.execute(
+          "INSERT INTO messages (user_id, username, canal, type, texte) VALUES (?, ?, ?, ?, ?)",
+          [data.userId, data.pseudo, data.canal, data.type, data.texte]
+        );
+        
+        // Diffuser à tous les clients
+        wss.clients.forEach((client) => {
+          if (client.readyState === ws.OPEN) {
+            client.send(message.toString());
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Erreur traitement message :", err);
+      // Diffuser quand même si c'est un message simple
+      wss.clients.forEach((client) => {
+        if (client.readyState === ws.OPEN) {
+          client.send(message.toString());
+        }
+      });
+    }
+  });
+});
+
+server.listen(3000, () => {
+  console.log("Serveur lancé sur http://localhost:3000");
+});
+
+// ══════════════════════════════════════════════════════════════════════════════════
+// ROUTES AUTHENTIFICATION
+// ══════════════════════════════════════════════════════════════════════════════════
 
 // Route inscription en gros pour envoyer mail
 
@@ -267,7 +295,7 @@ app.post("/connexion", async (req, res) => {
 // Route pour vérifier si l'utilisateur est connecté
 app.get("/verifier-session", (req, res) => {
     if (req.session.userId) {
-        return res.json({ connecte: true, username: req.session.username });
+        return res.json({ connecte: true, username: req.session.username, userId: req.session.userId });
     } else {
         return res.json({ connecte: false });
     }
@@ -278,5 +306,65 @@ app.post("/deconnexion", (req, res) => {
     req.session.destroy(() => {
         res.json({ success: true });
     });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ROUTES HISTORIQUE DES MESSAGES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Route pour charger l'historique d'un canal
+app.get("/historique/:canal/:type", async (req, res) => {
+    const { canal, type } = req.params;
+    
+    // Vérifications
+    if (!['public', 'private'].includes(type)) {
+        return res.json({ success: false, message: "Type invalide." });
+    }
+    
+    try {
+        const [messages] = await db.execute(
+            "SELECT id, username, texte, created_at FROM messages WHERE canal = ? AND type = ? ORDER BY created_at ASC",
+            [canal, type]
+        );
+        
+        return res.json({ 
+            success: true, 
+            messages: messages.map(msg => ({
+                pseudo: msg.username,
+                texte: msg.texte,
+                timestamp: msg.created_at
+            }))
+        });
+    } catch (err) {
+        console.error("Erreur chargement historique :", err);
+        return res.json({ success: false, message: "Erreur serveur." });
+    }
+});
+
+// Route pour sauvegarder un message (fallback en cas de problème WebSocket)
+app.post("/sauvegarder-message", async (req, res) => {
+    if (!req.session.userId) return res.json({ success: false, message: "Non connecté." });
+    
+    const { texte, canal, type } = req.body;
+    
+    if (!texte || !canal || !type) {
+        return res.json({ success: false, message: "Données manquantes." });
+    }
+    
+    if (!['public', 'private'].includes(type)) {
+        return res.json({ success: false, message: "Type invalide." });
+    }
+    
+    try {
+        await db.execute(
+            "INSERT INTO messages (user_id, username, canal, type, texte) VALUES (?, ?, ?, ?, ?)",
+            [req.session.userId, req.session.username, canal, type, texte]
+        );
+        
+        return res.json({ success: true });
+    } catch (err) {
+        console.error("Erreur sauvegarde message :", err);
+        return res.json({ success: false, message: "Erreur serveur." });
+    }
 });
 

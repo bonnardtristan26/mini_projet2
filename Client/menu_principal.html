@@ -6,7 +6,7 @@
     <title>LaDiscorde - Menu Principal</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="menu-page">
     <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="sidebar-header">
@@ -15,16 +15,16 @@
         </div>
         
         <div class="sidebar-item active" onclick="scrollToSection('welcome')">
-            <span>🏠</span> Accueil
+            <span></span> Accueil
         </div>
         <div class="sidebar-item" onclick="navigateTo('chat_general.html')">
-            <span>💬</span> Chat
+            <span></span> Chat
         </div>
         <div class="sidebar-item" onclick="navigateTo('login.html')">
-            <span>🔓</span> Connexion
+            <span></span> Connexion
         </div>
         <div class="sidebar-item" onclick="navigateTo('inscription.html')">
-            <span>✍️</span> Inscription
+            <span></span> Inscription
         </div>
         
         <hr style="border: none; border-top: 1px solid rgba(255, 0, 0, 0.2); margin: 20px 10px;">
@@ -40,8 +40,12 @@
         <div class="header">
             <div class="header-title">Bienvenue dans LaDiscorde</div>
             <div class="header-user">
-                <span>📱 Menu Principal</span>
+                <span>Menu Principal</span>
             </div>
+            <video width="150" height="150" autoplay loop muted style="margin-top: 15px;">
+                <source src="../Ressource/Video/iconladiscord.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la vidéo.
+            </video>
         </div>
         
         <!-- CONTENT AREA -->
