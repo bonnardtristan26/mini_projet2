@@ -28,3 +28,7 @@
 - Résolution du problème d'accès au chat après push
 - Implémentation du système de cookies de session
 - Migration du système d'email (Resend → Brevo)
+
+## 6.
+-avancer sur le chat générale la discorde, affichage utilisateur avec une nouvelle page base données
+pour les messages soit privée soit publiques, possibilité de voir et de parler avec les utilisateurs connecté 

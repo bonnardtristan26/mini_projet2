@@ -15,25 +15,19 @@
 
   <div class="layout">
 
-    <!-- COLONNE SERVEURS -->
-    <nav class="servers">
-      <div class="server-icon active" title="Chat général">
-        <img src="/Ressource/Image/logo_LaDiscorde.png" alt="LaDiscorde">
+    <!-- COLONNE SERVEURS (À GAUCHE) -->
+    <aside class="servers-sidebar">
+      <div class="servers-icons" id="servers-icons">
+        <!-- Serveurs seront ajoutés ici en JS -->
       </div>
-      <div class="server-icon" title="Serveur 2">🎮</div>
-      <div class="server-icon" title="Serveur 3">🔥</div>
-      <div class="server-icon" title="Ajouter" style="font-size:20px;color:rgba(200,0,0,0.5);">+</div>
-    </nav>
+    </aside>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sidebar-header">Canaux</div>
+    <!-- COLONNE CENTRALE (MP OU SALONS) -->
+    <aside class="sidebar" id="center-sidebar">
+      <div class="sidebar-header" id="sidebar-header">Messages privés</div>
       <div class="sidebar-list">
-        <div class="channel-item active" data-channel="général" data-type="public">💬 général</div>
-        <div class="channel-item" data-channel="annonces" data-type="public">📢 annonces</div>
-        <div class="channel-item" data-channel="gaming" data-type="public">🎮 gaming</div>
-        <div class="sidebar-header" style="margin-top:10px;">Messages privés</div>
         <div id="mp-list"></div>
+        <div id="channels-list"></div>
       </div>
       <div class="sidebar-footer">
         <div class="avatar"></div>
@@ -45,16 +39,16 @@
     <!-- ZONE CHAT PRINCIPALE -->
     <main class="chat-zone">
       <div class="chat-header">
-        <span>#</span> général
+        <span>👤</span> Messages privés
       </div>
       <div id="messages" style="display:none;"></div>
       <div id="welcome-zone" class="welcome-container">
         <img src="/Ressource/Image/logo_LaDiscorde.png" alt="LaDiscorde" class="welcome-logo">
         <h1>Bienvenue dans LaDiscorde</h1>
-        <p>Sélectionne un utilisateur à gauche pour discuter en privé ou utilise les canaux publics</p>
+        <p>Sélectionne un utilisateur à droite pour commencer une discussion privée ou choisis un serveur à gauche</p>
       </div>
       <div id="input-zone" style="display:none;">
-        <input type="text" id="messageInput" placeholder="Écris un message dans #général...">
+        <input type="text" id="messageInput" placeholder="Écris un message...">
         <button id="sendBtn" class="title">Envoyer</button>
       </div>
     </main>

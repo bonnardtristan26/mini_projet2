@@ -8,12 +8,51 @@ const usersList = document.getElementById("users-list");
 const welcomeZone = document.getElementById("welcome-zone");
 const inputZone = document.getElementById("input-zone");
 const mpList = document.getElementById("mp-list");
+const serversIcons = document.getElementById("servers-icons");
+const channelsList = document.getElementById("channels-list");
+const sidebarHeader = document.getElementById("sidebar-header");
+const centerSidebar = document.getElementById("center-sidebar");
 
 let monPseudo = "";
 let monUserId = "";
-let canalActuel = "général";
-let typeCanal = "public";
+let canalActuel = null;
+let typeCanal = null;
 let utilisateursEnLigne = new Map();
+let serveurActuel = null;
+
+// Structure des serveurs avec leurs salons
+const serveurs = [
+  {
+    id: 1,
+    nom: "Gaming",
+    image: "/Ressource/Image/logo_LaDiscorde.png",
+    salons: [
+      { id: 1, nom: "general", emoji: "💬" },
+      { id: 2, nom: "fps", emoji: "🎯" },
+      { id: 3, nom: "rpg", emoji: "⚔️" }
+    ]
+  },
+  {
+    id: 2,
+    nom: "Art & Créativité",
+    image: "/Ressource/Image/logo_LaDiscorde.png",
+    salons: [
+      { id: 1, nom: "galerie", emoji: "🖼️" },
+      { id: 2, nom: "critique", emoji: "💭" },
+      { id: 3, nom: "partage", emoji: "📸" }
+    ]
+  },
+  {
+    id: 3,
+    nom: "Musique",
+    image: "/Ressource/Image/logo_LaDiscorde.png",
+    salons: [
+      { id: 1, nom: "recommandations", emoji: "🎧" },
+      { id: 2, nom: "playlists", emoji: "📻" },
+      { id: 3, nom: "discussions", emoji: "💬" }
+    ]
+  }
+];
 
 // ═════════════════════════════════════════════════════════════════════════════
 // HISTORIQUE DES MESSAGES (Base de données)
@@ -100,6 +139,142 @@ function afficherChat() {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
+// AFFICHAGE DES SERVEURS
+// ═════════════════════════════════════════════════════════════════════════════
+
+function afficherServeurs() {
+  serversIcons.innerHTML = "";
+  
+  // Bouton pour retourner aux MP
+  const mpButton = document.createElement("div");
+  mpButton.classList.add("server-icon", "mp-icon", "active");
+  mpButton.setAttribute("title", "Messages privés");
+  
+  const mpImg = document.createElement("img");
+  mpImg.src = "/Ressource/Image/logo_LaDiscorde.png";
+  mpImg.alt = "Messages privés";
+  mpButton.appendChild(mpImg);
+  
+  mpButton.addEventListener("click", () => {
+    afficherMessagePrives();
+  });
+  
+  serversIcons.appendChild(mpButton);
+  
+  // Ajouter une ligne de séparation
+  const separator = document.createElement("div");
+  separator.style.height = "1px";
+  separator.style.background = "rgba(200,0,0,0.2)";
+  separator.style.margin = "10px 0";
+  serversIcons.appendChild(separator);
+  
+  serveurs.forEach(serveur => {
+    const serverIcon = document.createElement("div");
+    serverIcon.classList.add("server-icon");
+    serverIcon.setAttribute("data-server-id", serveur.id);
+    serverIcon.setAttribute("title", serveur.nom);
+    
+    // Vérifier si c'est une URL d'image ou un emoji
+    if (serveur.image.startsWith("/") || serveur.image.startsWith("http")) {
+      // C'est une image
+      const img = document.createElement("img");
+      img.src = serveur.image;
+      img.alt = serveur.nom;
+      serverIcon.appendChild(img);
+    } else {
+      // C'est un emoji
+      serverIcon.innerHTML = serveur.image;
+    }
+    
+    serverIcon.addEventListener("click", () => {
+      selectionnerServeur(serveur.id);
+    });
+    
+    serversIcons.appendChild(serverIcon);
+  });
+}
+
+function selectionnerServeur(serveurId) {
+  serveurActuel = serveurId;
+  const serveur = serveurs.find(s => s.id === serveurId);
+  
+  // Mise à jour visuelle des serveurs
+  document.querySelectorAll(".server-icon").forEach(icon => {
+    icon.classList.remove("active");
+    if (parseInt(icon.dataset.serverId) === serveurId) {
+      icon.classList.add("active");
+    }
+  });
+  
+  // Afficher les salons du serveur et cacher les MP
+  afficherSalons(serveur.salons, serveur.nom);
+}
+
+function afficherSalons(salons, nomServeur) {
+  // Masquer les MP
+  mpList.style.display = "none";
+  
+  // Afficher les salons
+  channelsList.style.display = "flex";
+  channelsList.innerHTML = "";
+  
+  // Mettre à jour le header
+  sidebarHeader.innerHTML = nomServeur;
+  
+  salons.forEach(salon => {
+    const salonItem = document.createElement("div");
+    salonItem.classList.add("salon-item");
+    salonItem.setAttribute("data-salon-id", salon.id);
+    salonItem.setAttribute("data-salon-nom", salon.nom);
+    salonItem.innerHTML = `<span>${salon.emoji}</span> ${salon.nom}`;
+    
+    salonItem.addEventListener("click", () => {
+      selectionnerSalon(salon, serveurActuel);
+    });
+    
+    channelsList.appendChild(salonItem);
+  });
+}
+
+function afficherMessagePrives() {
+  serveurActuel = null;
+  
+  // Masquer les salons
+  channelsList.style.display = "none";
+  channelsList.innerHTML = "";
+  
+  // Afficher les MP
+  mpList.style.display = "flex";
+  mpList.style.flexDirection = "column";
+  
+  // Mettre à jour le header
+  sidebarHeader.innerHTML = "Messages privés";
+  
+  // Mise à jour visuelle des serveurs
+  document.querySelectorAll(".server-icon").forEach(icon => {
+    icon.classList.remove("active");
+    if (icon.classList.contains("mp-icon")) {
+      icon.classList.add("active");
+    }
+  });
+}
+
+function selectionnerSalon(salon, serveurId) {
+  const serveur = serveurs.find(s => s.id === serveurId);
+  const nomCanal = `${serveur.nom}_${salon.nom}`;
+  
+  changerCanal(nomCanal, "public", `${salon.emoji} ${salon.nom}`);
+  
+  // Mise à jour visuelle des salons
+  document.querySelectorAll(".salon-item").forEach(item => {
+    item.classList.remove("active");
+    if (parseInt(item.dataset.salonId) === salon.id) {
+      item.classList.add("active");
+    }
+  });
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
 // OUVERTURE D'UN MESSAGE PRIVÉ
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -116,7 +291,7 @@ function ouvrirMessagePrive(pseudo, userId) {
     mpItem.setAttribute("data-channel", canalMP);
     mpItem.setAttribute("data-type", "private");
     mpItem.setAttribute("data-mp-user-id", userId);
-    mpItem.innerHTML = `👤 ${pseudo}`;
+    mpItem.innerHTML = `<img src="/Ressource/Image/logo_LaDiscorde.png" alt="MP" class="mp-logo"> ${pseudo}`;
     mpList.appendChild(mpItem);
     
     mpItem.addEventListener("click", () => {
@@ -128,7 +303,7 @@ function ouvrirMessagePrive(pseudo, userId) {
   changerCanal(canalMP, "private");
 }
 
-async function changerCanal(canal, type) {
+async function changerCanal(canal, type, titrePersonnalise = null) {
   canalActuel = canal;
   typeCanal = type;
   
@@ -136,8 +311,8 @@ async function changerCanal(canal, type) {
   const symbole = type === 'private' ? '👤' : '#';
   
   // Pour les MPs, afficher le pseudo de l'autre personne
-  let titre = canal;
-  if (type === 'private') {
+  let titre = titrePersonnalise || canal;
+  if (type === 'private' && !titrePersonnalise) {
     // Format du canal: MP_[id1]_[id2]
     const parts = canal.split('_');
     if (parts.length === 3) {
@@ -154,7 +329,7 @@ async function changerCanal(canal, type) {
   // Changement placeholder
   input.placeholder = type === 'private' 
     ? `Envoie un message privé à ${titre}...` 
-    : `Écris un message dans #${canal}...`;
+    : `Écris un message dans ${titrePersonnalise || '#' + canal}...`;
   
   // Afficher le chat ou la bienvenue
   if (type === 'public') {
@@ -307,8 +482,13 @@ input.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendBtn.click();
 });
 
-// Afficher la bienvenue au chargement
+// Afficher la bienvenue et les serveurs au chargement
 afficherBienvenue();
+afficherServeurs();
+afficherMessagePrives();
+
+// Initialiser l'état du channelsList
+channelsList.style.display = "none";
 
 
 
