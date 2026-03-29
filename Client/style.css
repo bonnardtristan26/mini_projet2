@@ -671,7 +671,7 @@ body.chat-body {
     color: rgba(255,0,0,0.8);
     font-size: 18px;
     transition: all 0.3s ease;
-    padding: 8px;
+    padding: 5px;
     border-radius: 6px;
     flex-shrink: 0;
 }
