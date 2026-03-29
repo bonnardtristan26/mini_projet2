@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaDiscorde - Menu Principal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="menu-page">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="../Ressource/Image/logo_LaDiscorde.png" alt="Logo">
+            <div class="title">LaDiscorde</div>
+        </div>
+        
+        <div class="sidebar-item active" onclick="scrollToSection('welcome')">
+            <span></span> Accueil
+        </div>
+        <div class="sidebar-item" onclick="navigateTo('chat_general.html')">
+            <span></span> Chat
+        </div>
+        <div class="sidebar-item" onclick="navigateTo('login.html')">
+            <span></span> Connexion
+        </div>
+        <div class="sidebar-item" onclick="navigateTo('inscription.html')">
+            <span></span> Inscription
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid rgba(255, 0, 0, 0.2); margin: 20px 10px;">
+        
+        <div style="padding: 10px 15px; font-size: 12px; color: rgba(200, 200, 200, 0.5);">
+            © 2026 LaDiscorde
+        </div>
+    </div>
+    
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-title">Bienvenue dans LaDiscorde</div>
+            <div class="header-user">
+                <span>Menu Principal</span>
+            </div>
+            <video width="150" height="150" autoplay loop muted style="margin-top: 15px;">
+                <source src="../Ressource/Video/iconladiscord.mp4" type="video/mp4">
+                Votre navigateur ne supporte pas la vidéo.
+            </video>
+        </div>
+        
+        <!-- CONTENT AREA -->
+        <div class="content">
+            <!-- CARD 1: SE CONNECTER -->
+            <a href="login.html" class="card">
+                <div class="card-icon"></div>
+                <div class="card-title">Se Connecter</div>
+                <div class="card-desc">Accédez à votre compte et rejoignez la communauté</div>
+            </a>
+            
+            <!-- CARD 2: CRÉER UN COMPTE -->
+            <a href="inscription.html" class="card">
+                <div class="card-icon"></div>
+                <div class="card-title">Créer un Compte</div>
+                <div class="card-desc">Rejoignez-nous et commencez à discuter en temps réel</div>
+            </a>
+            
+            <!-- CARD 3: CHAT GÉNÉRAL -->
+            <a href="chat_general.html" class="card">
+                <div class="card-icon"></div>
+                <div class="card-title">Chat Général</div>
+                <div class="card-desc">Discutez avec d'autres utilisateurs en direct</div>
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+        
+        function scrollToSection(section) {
+            console.log("Section: " + section);
+        }
+    </script>
+    <script src="partieClient.js"></script>
+</body>
+</html>

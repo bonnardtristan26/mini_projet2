@@ -3,37 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <title>Chat WebSocket</title>
-  <link rel="stylesheet" href="chat_general.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<style>
-@font-face {
-  font-family: "LoserMotoClub";
-  src: url('../Ressource/Front/LoserMotoClub.ttf');
-}
-.titre {
-  font-family: "LoserMotoClub", sans-serif;
-}
-</style>
+  <!-- BARRE DU HAUT -->
+  <header class="topbar">
+    <p class="app-title">LaDiscorde</p>
+    <img src="/Ressource/Image/logo_LaDiscorde.png" alt="Logo LaDiscorde">
+  </header>
 
-<!-- BARRE DU HAUT -->
-<div style="position: fixed; top: 0; left: 0; width: 100%; height: 40px; background: rgba(10,10,10,0.90); 
-border-bottom: 1px solid rgba(200,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 100;">
-  <p class="title" style="font-size: 18px; margin: 0; color: white; letter-spacing: 2px;">LaDiscorde</p>
-  <img src="../Ressource/Image/logo_LaDiscorde.png" style="width: 26px; height: auto; position: absolute; right: 16px;" alt="Logo LaDiscorde">
-</div>
+  <div class="layout">
 
-<h1 class="titre" style="font-size: 18px; margin: 0; color: black; letter-spacing: 0px;">Chat en ligne</h1>
+    <!-- COLONNE SERVEURS -->
+    <nav class="servers">
+      <div class="server-icon active" title="Chat général">
+        <img src="/Ressource/Image/logo_LaDiscorde.png" alt="LaDiscorde">
+      </div>
+      <div class="server-icon" title="Serveur 2">🎮</div>
+      <div class="server-icon" title="Serveur 3">🔥</div>
+      <div class="server-icon" title="Ajouter" style="font-size:20px;color:rgba(200,0,0,0.5);">+</div>
+    </nav>
 
-<div id="messages"></div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">Canaux</div>
+      <div class="sidebar-list">
+        <div class="channel-item active" data-channel="général" data-type="public">💬 général</div>
+        <div class="channel-item" data-channel="annonces" data-type="public">📢 annonces</div>
+        <div class="channel-item" data-channel="gaming" data-type="public">🎮 gaming</div>
+        <div class="sidebar-header" style="margin-top:10px;">Messages privés</div>
+        <div class="channel-item" data-channel="MP_1" data-type="private">👤 MP 1</div>
+        <div class="channel-item" data-channel="MP_2" data-type="private">👤 MP 2</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="avatar"></div>
+        <span class="pseudo" id="pseudo-connecte">...</span>
+        <button class="btn-deco" onclick="deconnecter()" title="Se déconnecter">⏻</button>
+      </div>
+    </aside>
 
-<div id="input-zone">
-  <input type="text" id="messageInput" placeholder="Écris un message..." class="texts" style="font-size: 15px; margin: 0; color: black; letter-spacing: 0px;">
-  <button id="sendBtn" class="title">Envoyer</button>
-</div>
+    <!-- ZONE CHAT -->
+    <main class="chat-zone">
+      <div class="chat-header">
+        <span>#</span> général
+      </div>
+      <div id="messages"></div>
+      <div id="input-zone">
+        <input type="text" id="messageInput" placeholder="Écris un message dans #général...">
+        <button id="sendBtn" class="title">Envoyer</button>
+      </div>
+    </main>
 
-<script src="partieClient.js"></script>
+  </div>
+
+  <!-- BARRE DU BAS -->
+  <footer class="bottombar">
+    <p>Chat général — LaDiscorde</p>
+  </footer>
+
+  <script>
+    // Vérification session
+    fetch('/verifier-session')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.connecte) {
+          window.location.href = "login.html";
+        } else {
+          document.getElementById('pseudo-connecte').textContent = data.username;
+        }
+      });
+
+    // Déconnexion
+    async function deconnecter() {
+      await fetch('/deconnexion', { method: 'POST' });
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <script src="partieClient.js"></script>
+
 </body>
 </html>
-
