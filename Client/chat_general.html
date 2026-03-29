@@ -33,8 +33,7 @@
         <div class="channel-item" data-channel="annonces" data-type="public">📢 annonces</div>
         <div class="channel-item" data-channel="gaming" data-type="public">🎮 gaming</div>
         <div class="sidebar-header" style="margin-top:10px;">Messages privés</div>
-        <div class="channel-item" data-channel="MP_1" data-type="private">👤 MP 1</div>
-        <div class="channel-item" data-channel="MP_2" data-type="private">👤 MP 2</div>
+        <div id="mp-list"></div>
       </div>
       <div class="sidebar-footer">
         <div class="avatar"></div>
@@ -43,17 +42,31 @@
       </div>
     </aside>
 
-    <!-- ZONE CHAT -->
+    <!-- ZONE CHAT PRINCIPALE -->
     <main class="chat-zone">
       <div class="chat-header">
         <span>#</span> général
       </div>
-      <div id="messages"></div>
-      <div id="input-zone">
+      <div id="messages" style="display:none;"></div>
+      <div id="welcome-zone" class="welcome-container">
+        <img src="/Ressource/Image/logo_LaDiscorde.png" alt="LaDiscorde" class="welcome-logo">
+        <h1>Bienvenue dans LaDiscorde</h1>
+        <p>Sélectionne un utilisateur à gauche pour discuter en privé ou utilise les canaux publics</p>
+      </div>
+      <div id="input-zone" style="display:none;">
         <input type="text" id="messageInput" placeholder="Écris un message dans #général...">
         <button id="sendBtn" class="title">Envoyer</button>
       </div>
     </main>
+
+    <!-- PANNEAU UTILISATEURS EN LIGNE -->
+    <aside class="users-panel">
+      <div class="users-header">
+        <h3>En ligne</h3>
+        <span class="online-count" id="online-count">0</span>
+      </div>
+      <div class="users-list" id="users-list"></div>
+    </aside>
 
   </div>
 

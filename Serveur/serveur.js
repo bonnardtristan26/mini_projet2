@@ -11,7 +11,7 @@
 // ══════════════════════════════════════════════════════════════════════════════════
 
 import express from "express";
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -67,7 +67,7 @@ const transporter = nodemailer.createTransport({
     secure: false,
     auth: {
         user: "a658f1001@smtp-brevo.com",
-        pass: "xsmtpsib-df59dfe619649d0cc7f1ab0329ea9570e3ba19cc41245f64c50836e10d2e8d9f-gyJ18H9j8RABZsc7"
+        pass: "xsmtpsib-df59dfe619649d0cc7f1ab0329ea9570e3ba19cc41245f64c50836e10d2e8d9f-6JgYSu9CUnHQGSRE"
     }
 });
 
@@ -80,8 +80,34 @@ const wss = new WebSocketServer({ server });
 // Map pour tracker les clients connectés avec leur session
 const clientSessions = new Map();
 
+// Map pour tracker les utilisateurs en ligne (userId => { pseudo, ws })
+const utilisateursEnLigne = new Map();
+
+// Fonction pour diffuser la liste des utilisateurs en ligne à tous les clients
+function diffuserUtilisateurs() {
+  const users = Array.from(utilisateursEnLigne.values()).map(user => ({
+    userId: user.userId,
+    pseudo: user.pseudo
+  }));
+  
+  const message = JSON.stringify({
+    type: "online_users",
+    users: users
+  });
+  
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+}
+
 wss.on("connection", (ws) => {
   console.log("Client connecté");
+  
+  let userConnected = false;
+  let userId = null;
+  let pseudo = null;
   
   // Récupérer les infos de session du client (envoyées à la connexion)
   ws.on("message", async (message) => {
@@ -89,6 +115,26 @@ wss.on("connection", (ws) => {
     
     try {
       const data = JSON.parse(message.toString());
+      
+      // Message de connexion utilisateur
+      if (data.type === "user_connect" && data.userId && data.pseudo) {
+        userId = data.userId;
+        pseudo = data.pseudo;
+        userConnected = true;
+        
+        // Ajouter l'utilisateur à la liste des en ligne
+        utilisateursEnLigne.set(userId, {
+          userId: userId,
+          pseudo: pseudo,
+          ws: ws
+        });
+        
+        console.log(`${pseudo} (ID: ${userId}) connecté`);
+        
+        // Diffuser la liste mise à jour à tous les clients
+        diffuserUtilisateurs();
+        return;
+      }
       
       // Si c'est un message avec canal et type
       if (data.pseudo && data.texte && data.canal && data.type && data.userId) {
@@ -100,7 +146,7 @@ wss.on("connection", (ws) => {
         
         // Diffuser à tous les clients
         wss.clients.forEach((client) => {
-          if (client.readyState === ws.OPEN) {
+          if (client.readyState === WebSocket.OPEN) {
             client.send(message.toString());
           }
         });
@@ -109,10 +155,21 @@ wss.on("connection", (ws) => {
       console.error("Erreur traitement message :", err);
       // Diffuser quand même si c'est un message simple
       wss.clients.forEach((client) => {
-        if (client.readyState === ws.OPEN) {
+        if (client.readyState === WebSocket.OPEN) {
           client.send(message.toString());
         }
       });
+    }
+  });
+  
+  // Gestion de la déconnexion
+  ws.on("close", () => {
+    if (userConnected && userId) {
+      utilisateursEnLigne.delete(userId);
+      console.log(`${pseudo} (ID: ${userId}) déconnecté`);
+      
+      // Diffuser la liste mise à jour à tous les clients
+      diffuserUtilisateurs();
     }
   });
 });

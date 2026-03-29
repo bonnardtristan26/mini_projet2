@@ -4,11 +4,16 @@ const messagesDiv = document.getElementById("messages");
 const input = document.getElementById("messageInput");
 const sendBtn = document.getElementById("sendBtn");
 const channelHeader = document.querySelector(".chat-header");
+const usersList = document.getElementById("users-list");
+const welcomeZone = document.getElementById("welcome-zone");
+const inputZone = document.getElementById("input-zone");
+const mpList = document.getElementById("mp-list");
 
 let monPseudo = "";
 let monUserId = "";
 let canalActuel = "général";
 let typeCanal = "public";
+let utilisateursEnLigne = new Map();
 
 // ═════════════════════════════════════════════════════════════════════════════
 // HISTORIQUE DES MESSAGES (Base de données)
@@ -50,18 +55,113 @@ function afficherMessages(messages) {
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
+// ═════════════════════════════════════════════════════════════════════════════
+// AFFICHAGE DES UTILISATEURS EN LIGNE
+// ═════════════════════════════════════════════════════════════════════════════
+
+function afficherUtilisateurs() {
+  usersList.innerHTML = "";
+  utilisateursEnLigne.forEach((user, userId) => {
+    // Ne pas afficher soi-même
+    if (userId === monUserId) return;
+    
+    const userItem = document.createElement("div");
+    userItem.classList.add("user-item");
+    userItem.id = `user-${userId}`;
+    userItem.innerHTML = `
+      <div class="user-avatar">
+        ${user.pseudo.charAt(0).toUpperCase()}
+        <div class="online-badge"></div>
+      </div>
+      <div class="user-name">${user.pseudo}</div>
+    `;
+    
+    userItem.addEventListener("click", () => {
+      ouvrirMessagePrive(user.pseudo, userId);
+    });
+    
+    usersList.appendChild(userItem);
+  });
+  
+  // Mettre à jour le compteur
+  document.getElementById("online-count").textContent = utilisateursEnLigne.size - 1;
+}
+
+function afficherBienvenue() {
+  messagesDiv.style.display = "none";
+  inputZone.style.display = "none";
+  welcomeZone.style.display = "flex";
+}
+
+function afficherChat() {
+  messagesDiv.style.display = "flex";
+  inputZone.style.display = "flex";
+  welcomeZone.style.display = "none";
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// OUVERTURE D'UN MESSAGE PRIVÉ
+// ═════════════════════════════════════════════════════════════════════════════
+
+function ouvrirMessagePrive(pseudo, userId) {
+  // Vérifier si le MP existe déjà
+  const canalMP = `MP_${Math.min(monUserId, userId)}_${Math.max(monUserId, userId)}`;
+  
+  // Vérifier si un item avec ce pseudo existe déjà
+  const existant = mpList.querySelector(`[data-mp-user-id="${userId}"]`);
+  
+  if (!existant) {
+    const mpItem = document.createElement("div");
+    mpItem.classList.add("channel-item");
+    mpItem.setAttribute("data-channel", canalMP);
+    mpItem.setAttribute("data-type", "private");
+    mpItem.setAttribute("data-mp-user-id", userId);
+    mpItem.innerHTML = `👤 ${pseudo}`;
+    mpList.appendChild(mpItem);
+    
+    mpItem.addEventListener("click", () => {
+      changerCanal(canalMP, "private");
+    });
+  }
+  
+  // Switcher vers le MP
+  changerCanal(canalMP, "private");
+}
+
 async function changerCanal(canal, type) {
   canalActuel = canal;
   typeCanal = type;
   
   // Mise à jour du header
   const symbole = type === 'private' ? '👤' : '#';
-  channelHeader.innerHTML = `<span>${symbole}</span> ${canal}`;
+  
+  // Pour les MPs, afficher le pseudo de l'autre personne
+  let titre = canal;
+  if (type === 'private') {
+    // Format du canal: MP_[id1]_[id2]
+    const parts = canal.split('_');
+    if (parts.length === 3) {
+      const id1 = parseInt(parts[1]);
+      const id2 = parseInt(parts[2]);
+      const otherUserId = id1 === monUserId ? id2 : id1;
+      const user = utilisateursEnLigne.get(otherUserId);
+      if (user) titre = user.pseudo;
+    }
+  }
+  
+  channelHeader.innerHTML = `<span>${symbole}</span> ${titre}`;
   
   // Changement placeholder
   input.placeholder = type === 'private' 
-    ? `Envoie un message privé à ${canal}...` 
+    ? `Envoie un message privé à ${titre}...` 
     : `Écris un message dans #${canal}...`;
+  
+  // Afficher le chat ou la bienvenue
+  if (type === 'public') {
+    afficherChat();
+  } else {
+    afficherChat();
+  }
   
   // Charger l'historique depuis la BDD
   const messages = await chargerHistorique(canal, type);
@@ -72,6 +172,22 @@ async function changerCanal(canal, type) {
     item.classList.remove("active");
     if (item.dataset.channel === canal && item.dataset.type === type) {
       item.classList.add("active");
+    }
+  });
+  
+  // Mise à jour visuelle des utilisateurs
+  document.querySelectorAll(".user-item").forEach(item => {
+    item.classList.remove("active");
+    if (type === 'private') {
+      const parts = canal.split('_');
+      if (parts.length === 3) {
+        const id1 = parseInt(parts[1]);
+        const id2 = parseInt(parts[2]);
+        const otherUserId = id1 === monUserId ? id2 : id1;
+        if (item.id === `user-${otherUserId}`) {
+          item.classList.add("active");
+        }
+      }
     }
   });
 }
@@ -89,25 +205,71 @@ document.querySelectorAll(".channel-item").forEach(item => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
+// INITIALISATION DE LA SESSION ET WEBSOCKET
+// ═════════════════════════════════════════════════════════════════════════════
 
 // Charger les infos de session
+let sessionLoaded = false;
 fetch('/verifier-session')
   .then(r => r.json())
   .then(data => { 
     if (data.connecte) {
       monPseudo = data.username;
       monUserId = data.userId;
+      sessionLoaded = true;
+      
+      // Envoyer les infos au serveur si la connection WebSocket est déjà établie
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+          type: "user_connect",
+          userId: monUserId,
+          pseudo: monPseudo
+        }));
+      }
     }
   });
 
-socket.addEventListener("open", () => console.log("Connecté au serveur WebSocket"));
+socket.addEventListener("open", () => {
+  console.log("Connecté au serveur WebSocket");
+  
+  // Envoyer les infos de l'utilisateur au serveur
+  if (sessionLoaded) {
+    socket.send(JSON.stringify({
+      type: "user_connect",
+      userId: monUserId,
+      pseudo: monPseudo
+    }));
+  }
+});
+
 socket.addEventListener("error", () => console.log("Erreur WebSocket !"));
 
-// Pour les box de texte
+// ═════════════════════════════════════════════════════════════════════════════
+// RÉCEPTION DES MESSAGES ET MISE À JOUR DES UTILISATEURS
+// ═════════════════════════════════════════════════════════════════════════════
+
 socket.addEventListener("message", (event) => {
   let data;
-  try { data = JSON.parse(event.data); }
-  catch { data = { pseudo: "Inconnu", texte: event.data }; }
+  try { 
+    data = JSON.parse(event.data); 
+  } catch { 
+    data = { pseudo: "Inconnu", texte: event.data };
+  }
+
+  // Si c'est une mise à jour des utilisateurs en ligne
+  if (data.type === "online_users") {
+    utilisateursEnLigne = new Map();
+    data.users.forEach(user => {
+      utilisateursEnLigne.set(user.userId, { pseudo: user.pseudo });
+    });
+    afficherUtilisateurs();
+    return;
+  }
+  
+  // Vérifier que c'est un message pour le canal actuel
+  if (data.canal !== canalActuel || data.type !== typeCanal) {
+    return;
+  }
 
   const estMoi = data.pseudo === monPseudo;
   const div = document.createElement("div");
@@ -121,6 +283,10 @@ socket.addEventListener("message", (event) => {
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENVOI DE MESSAGES
+// ═════════════════════════════════════════════════════════════════════════════
 
 sendBtn.addEventListener("click", () => {
   if (input.value.trim() !== "") {
@@ -140,6 +306,9 @@ sendBtn.addEventListener("click", () => {
 input.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendBtn.click();
 });
+
+// Afficher la bienvenue au chargement
+afficherBienvenue();
 
 
 
