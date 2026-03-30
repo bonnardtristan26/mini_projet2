@@ -67,9 +67,7 @@ const transporter = nodemailer.createTransport({
     secure: true,
     auth: {
         //Mettez ici  votre compte Brevo.
-        user: "a658f1001@smtp-brevo.com",
         //Puis mettez ici la clef API que vou savez généré.
-        pass: "clefapibrevo"
     }
 });
 
