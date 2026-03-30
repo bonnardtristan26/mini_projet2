@@ -88,14 +88,37 @@ function afficherMessages(messages) {
   
   messages.forEach(msg => {
     const estMoi = msg.pseudo === monPseudo;
+    const user = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === msg.pseudo);
+    let avatarSrc = user && user.avatar ? user.avatar : "/Ressource/Image/logo_LaDiscorde.png";
+    // Format de l'heure
+    let heure = msg.heure ? msg.heure : "";
+    if (heure) {
+      const date = new Date(heure);
+      heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      heure = heure.replace(":", "h");
+    }
     const div = document.createElement("div");
     div.classList.add("message-row");
     div.classList.add(estMoi ? "moi" : "autre");
 
-    div.innerHTML = `
-      <div class="msg-pseudo">${msg.pseudo}</div>
-      <div class="msg-bubble">${msg.texte}</div>`;
 
+    if (estMoi) {
+      div.innerHTML = `
+        <div class=\"msg-header\">
+          <div class=\"msg-heure\">${heure}</div>
+          <div class=\"msg-pseudo\">${msg.pseudo}</div>
+          <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+        </div>
+        <div class=\"msg-bubble\">${msg.texte}</div>`;
+    } else {
+      div.innerHTML = `
+        <div class=\"msg-header\">
+          <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+          <div class=\"msg-pseudo\">${msg.pseudo}</div>
+          <div class=\"msg-heure\">${heure}</div>
+        </div>
+        <div class=\"msg-bubble\">${msg.texte}</div>`;
+    }
     messagesDiv.appendChild(div);
   });
   
@@ -248,15 +271,15 @@ function afficherSalons(salons, nomServeur) {
 
 function afficherMessagePrives() {
   serveurActuel = null;
-  
-  // Masquer les salons
   channelsList.style.display = "none";
-  channelsList.innerHTML = "";
   
-  // Afficher les MP
+  // Afficher les listes de MP et de Groupes
   mpList.style.display = "flex";
-  mpList.style.flexDirection = "column";
-  
+  const groupesList = document.getElementById('groupes-list');
+  if (groupesList) {
+    groupesList.style.display = "flex";
+    rafraichirGroupes(); // Charger les groupes depuis le serveur
+  }
   // Mettre à jour le titre sans écraser le bouton +
   document.getElementById('sidebar-header-title').textContent = "Messages privés";
   
@@ -267,6 +290,28 @@ function afficherMessagePrives() {
       icon.classList.add("active");
     }
   });
+}
+
+async function rafraichirGroupes() {
+  const groupesList = document.getElementById('groupes-list');
+  if (!groupesList) return;
+  groupesList.innerHTML = '';
+
+  try {
+    const res = await fetch('/groupes');
+    const data = await res.json();
+    if (data.success && Array.isArray(data.groupes)) {
+      data.groupes.forEach(groupe => {
+        const div = document.createElement('div');
+        div.className = 'channel-item'; // Utilise la même classe que les MP
+        div.innerHTML = `👥 ${groupe.nom}`;
+        div.onclick = () => changerCanal('GROUPE_' + groupe.id, 'group', groupe.nom);
+        groupesList.appendChild(div);
+      });
+    }
+  } catch (e) {
+    console.error('Erreur chargement groupes :', e);
+  }
 }
 
 function selectionnerSalon(salon, serveurId) {
@@ -457,14 +502,35 @@ socket.addEventListener("message", (event) => {
   }
 
   const estMoi = data.pseudo === monPseudo;
+  const user = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === data.pseudo);
+  let avatarSrc = user && user.avatar ? user.avatar : "/Ressource/Image/logo_LaDiscorde.png";
+  let heure = data.heure ? data.heure : "";
+  if (heure) {
+    const date = new Date(heure);
+    heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    heure = heure.replace(":", "h");
+  }
   const div = document.createElement("div");
   div.classList.add("message-row");
   div.classList.add(estMoi ? "moi" : "autre");
 
-  div.innerHTML = `
-    <div class="msg-pseudo">${data.pseudo}</div>
-    <div class="msg-bubble">${data.texte}</div>`;
-
+  if (estMoi) {
+    div.innerHTML = `
+      <div class=\"msg-header\">
+        <div class=\"msg-heure\">${heure}</div>
+        <div class=\"msg-pseudo\">${data.pseudo}</div>
+        <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+      </div>
+      <div class=\"msg-bubble\">${data.texte}</div>`;
+  } else {
+    div.innerHTML = `
+      <div class=\"msg-header\">
+        <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+        <div class=\"msg-pseudo\">${data.pseudo}</div>
+        <div class=\"msg-heure\">${heure}</div>
+      </div>
+      <div class=\"msg-bubble\">${data.texte}</div>`;
+  }
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
@@ -692,6 +758,19 @@ async function login() {
     }
 }
 
+// ─── EASTER EGGMAN ─────────────────────────────────────────────────────────────────────
+logo.addEventListener('click', () => {
+  if (musique.paused) {
+    // Si la musique est en pause, on la joue
+    musique.play();
+    logo.style.opacity = "0.7"; // Optionnel : petit feedback visuel quand ça joue
+  } else {
+    // Si elle joue déjà, on la met en pause et on revient au début
+    musique.pause();
+    musique.currentTime = 0; 
+    logo.style.opacity = "1";
+  }
+});
 // ═════════════════════════════════════════════════════════════════════════════
 // GESTION DES GROUPES DE DISCUSSION
 // ═════════════════════════════════════════════════════════════════════════════
@@ -726,6 +805,12 @@ async function validerCreationGroupe() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nom })
     });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => null);
+      throw new Error(errData?.message || `HTTP ${res.status}`);
+    }
+
     const data = await res.json();
     if (data.success) {
       fermerModalGroupe();
@@ -734,7 +819,8 @@ async function validerCreationGroupe() {
       alert('Erreur : ' + data.message);
     }
   } catch (e) {
-    alert('Le serveur ne répond pas.');
+    console.error('Erreur création groupe :', e);
+    alert('Le serveur ne répond pas. ' + (e.message || '')); 
   }
 }
 
@@ -742,17 +828,33 @@ async function rafraichirGroupes() {
   const groupesList = document.getElementById('groupes-list');
   if (!groupesList) return;
   groupesList.innerHTML = '';
-
   try {
     const res = await fetch('/groupes');
     const data = await res.json();
     if (data.success && Array.isArray(data.groupes)) {
       data.groupes.forEach(groupe => {
         const div = document.createElement('div');
-        div.className = 'sidebar-item';
-        div.textContent = '👥 ' + groupe.nom;
-        div.style.cursor = 'pointer';
-        div.onclick = () => changerCanal('GROUPE_' + groupe.id, 'groupe', groupe.nom);
+        div.classList.add('channel-item');
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.alignItems = 'center';
+
+        const nom = document.createElement('span');
+        nom.textContent = '👥 ' + groupe.nom;
+        nom.style.cursor = 'pointer';
+        nom.onclick = () => changerCanal('GROUPE_' + groupe.id, 'group', groupe.nom);
+
+        // Bouton gérer membres
+        const btnGerer = document.createElement('span');
+        btnGerer.textContent = '⚙️';
+        btnGerer.style.cursor = 'pointer';
+        btnGerer.style.fontSize = '12px';
+        btnGerer.style.opacity = '0.6';
+        btnGerer.title = 'Gérer les membres';
+        btnGerer.onclick = (e) => { e.stopPropagation(); ouvrirGestionMembres(groupe.id, groupe.nom); };
+
+        div.appendChild(nom);
+        div.appendChild(btnGerer);
         groupesList.appendChild(div);
       });
     }
@@ -761,12 +863,74 @@ async function rafraichirGroupes() {
   }
 }
 
-// Exposer globalement (appelé depuis le HTML inline)
-window.ouvrirModalGroupe = ouvrirModalGroupe;
-window.fermerModalGroupe = fermerModalGroupe;
-window.validerCreationGroupe = validerCreationGroupe;
+// Ouvre la modale de gestion des membres
+async function ouvrirGestionMembres(groupeId, nomGroupe) {
+  // Crée la modale si elle n'existe pas
+  let modal = document.getElementById('modal-membres');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modal-membres';
+    modal.style.cssText = `display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.8); z-index:10001; align-items:center; justify-content:center;`;
+    modal.innerHTML = `
+      <div style="background:#1a1a1a; padding:25px; border-radius:12px; border:1px solid #c0000e; width:380px;">
+        <h2 id="modal-membres-titre" style="color:white; margin:0 0 16px; font-size:1.1rem;"></h2>
+        <div id="membres-liste" style="margin-bottom:16px; max-height:200px; overflow-y:auto;"></div>
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <input id="input-ajout-membre" type="text" placeholder="Pseudo à ajouter..."
+            style="flex:1; padding:10px; background:#333; border:1px solid #444; color:white; border-radius:5px; outline:none;">
+          <button onclick="ajouterMembreGroupe()"
+            style="background:#c0000e; color:white; border:none; padding:10px 16px; border-radius:5px; cursor:pointer;">
+            Ajouter
+          </button>
+        </div>
+        <button onclick="document.getElementById('modal-membres').style.display='none'"
+          style="background:transparent; color:#aaa; border:none; cursor:pointer; width:100%; text-align:right;">
+          Fermer
+        </button>
+      </div>`;
+    document.body.appendChild(modal);
+  }
 
-// Initialisation au chargement
-if (estPageChat) {
-  rafraichirGroupes();
+  modal.dataset.groupeId = groupeId;
+  document.getElementById('modal-membres-titre').textContent = '👥 ' + nomGroupe;
+  modal.style.display = 'flex';
+  await chargerMembres(groupeId);
+}
+
+async function chargerMembres(groupeId) {
+  const liste = document.getElementById('membres-liste');
+  const res = await fetch(`/groupes/${groupeId}/membres`);
+  const data = await res.json();
+  liste.innerHTML = '';
+  if (data.success) {
+    data.membres.forEach(m => {
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:6px 0; color:#ccc; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.05);';
+      div.textContent = '👤 ' + m.username;
+      liste.appendChild(div);
+    });
+  }
+}
+
+async function ajouterMembreGroupe() {
+  const groupeId = document.getElementById('modal-membres').dataset.groupeId;
+  const username = document.getElementById('input-ajout-membre').value.trim();
+  if (!username) return;
+  const res = await fetch(`/groupes/${groupeId}/membres`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username })
+  });
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById('input-ajout-membre').value = '';
+    await chargerMembres(groupeId);
+  } else {
+    alert(data.message || 'Erreur');
+  }
+
+
+window.ajouterMembreGroupe = ajouterMembreGroupe;
+window.ouvrirGestionMembres = ouvrirGestionMembres;
 }

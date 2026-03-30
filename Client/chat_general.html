@@ -37,9 +37,14 @@
         </button>
       </div>
       <div class="sidebar-list">
-        <div id="mp-list"></div>
-        <div id="groupes-list"></div>
-        <div id="channels-list"></div>
+        <div id="mp-list" style="display: flex; flex-direction: column;"></div>
+  
+        <div id="groupes-header" style="padding: 10px; color: #888; font-size: 12px; font-weight: bold; text-transform: uppercase; display: none;">
+          Groupes
+        </div>
+        
+        <div id="groupes-list" style="display: none; flex-direction: column;"></div>
+        <div id="channels-list" style="display: none; flex-direction: column;"></div>
       </div>
       <div class="sidebar-footer">
         <div class="avatar"></div>

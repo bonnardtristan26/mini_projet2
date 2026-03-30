@@ -422,6 +422,81 @@ app.get("/historique/:canal/:type", async (req, res) => {
     }
 });
 
+// Routes gestion des groupes
+app.get('/groupes', async (req, res) => {
+    try {
+        const [groupes] = await db.execute("SELECT id, nom, createur_id FROM groupes ORDER BY created_at DESC");
+        return res.json({ success: true, groupes });
+    } catch (err) {
+        console.error('Erreur récupération groupes :', err);
+        return res.json({ success: false, message: 'Erreur serveur.' });
+    }
+});
+
+app.post('/groupes', async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ success: false, message: 'Non connecté.' });
+    }
+
+    const { nom } = req.body;
+    if (!nom || typeof nom !== 'string' || !nom.trim()) {
+        return res.status(400).json({ success: false, message: 'Nom de groupe invalide.' });
+    }
+
+    try {
+        const [result] = await db.execute(
+            "INSERT INTO groupes (nom, createur_id) VALUES (?, ?)",
+            [nom.trim(), req.session.userId]
+        );
+
+        // Ajouter le créateur en tant que membre du groupe
+        await db.execute(
+            "INSERT INTO groupe_membres (groupe_id, user_id) VALUES (?, ?)",
+            [result.insertId, req.session.userId]
+        );
+
+        return res.json({ success: true, groupe: { id: result.insertId, nom: nom.trim(), createur_id: req.session.userId } });
+    } catch (err) {
+        console.error('Erreur création groupe :', err);
+        return res.json({ success: false, message: 'Erreur serveur.' });
+    }
+});
+
+// Récupérer les membres d'un groupe
+app.get('/groupes/:id/membres', async (req, res) => {
+    try {
+        const [membres] = await db.execute(
+            `SELECT u.id, u.username FROM utilisateurs u
+             JOIN groupe_membres gm ON gm.user_id = u.id
+             WHERE gm.groupe_id = ?`, [req.params.id]
+        );
+        return res.json({ success: true, membres });
+    } catch (err) {
+        return res.json({ success: false });
+    }
+});
+
+// Ajouter un membre à un groupe
+app.post('/groupes/:id/membres', async (req, res) => {
+    if (!req.session.userId) return res.json({ success: false });
+    const { username } = req.body;
+    try {
+        const [user] = await db.execute("SELECT id FROM utilisateurs WHERE username = ?", [username]);
+        if (user.length === 0) return res.json({ success: false, message: "Utilisateur introuvable." });
+        await db.execute("INSERT IGNORE INTO groupe_membres (groupe_id, user_id) VALUES (?, ?)", [req.params.id, user[0].id]);
+        return res.json({ success: true });
+    } catch (err) {
+        return res.json({ success: false, message: "Erreur serveur." });
+    }
+});
+
+// Récupérer tous les utilisateurs (pour l'ajout)
+app.get('/utilisateurs', async (req, res) => {
+    if (!req.session.userId) return res.json({ success: false });
+    const [users] = await db.execute("SELECT id, username FROM utilisateurs WHERE email_verifie = 1");
+    return res.json({ success: true, utilisateurs: users });
+});
+
 // Route pour sauvegarder un message (fallback en cas de problème WebSocket)
 app.post("/sauvegarder-message", async (req, res) => {
     if (!req.session.userId) return res.json({ success: false, message: "Non connecté." });
@@ -432,7 +507,7 @@ app.post("/sauvegarder-message", async (req, res) => {
         return res.json({ success: false, message: "Données manquantes." });
     }
     
-    if (!['public', 'private'].includes(type)) {
+    if (!['public', 'private', 'group'].includes(type)) {
         return res.json({ success: false, message: "Type invalide." });
     }
     
