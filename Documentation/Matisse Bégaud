@@ -32,3 +32,9 @@
 ## 6.
 -avancer sur le chat générale la discorde, affichage utilisateur avec une nouvelle page base données
 pour les messages soit privée soit publiques, possibilité de voir et de parler avec les utilisateurs connecté 
+travail personnel
+
+## 7.
+travail sur envoie de mail car bloquer par le proxy, je suis passer par le protocole icmp de l'api brevo,
+ajout de customisation de la photo de profil, 3 suggéré et on peut téléverser notre propre photo,
+ajout d'un description pas totalement terminé, visible uniquement par nous même
