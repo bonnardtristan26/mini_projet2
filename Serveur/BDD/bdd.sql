@@ -65,3 +65,19 @@ CREATE TABLE IF NOT EXISTS `messages` (
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+CREATE TABLE IF NOT EXISTS `groupes` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `nom` varchar(50) NOT NULL,
+  `createur_id` int(10) UNSIGNED NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `groupe_membres` (
+  `groupe_id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`groupe_id`, `user_id`),
+  FOREIGN KEY (`groupe_id`) REFERENCES `groupes`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `messages` MODIFY COLUMN `type` enum('public','private','group') NOT NULL DEFAULT 'public';
