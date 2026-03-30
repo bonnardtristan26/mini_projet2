@@ -107,25 +107,27 @@ function afficherUtilisateurs() {
   utilisateursEnLigne.forEach((user, userId) => {
     // Ne pas afficher soi-même
     if (userId === monUserId) return;
-    
+
+    // Avatar : utiliser l'URL reçue du serveur
+    let avatarSrc = user.avatar || "/Ressource/Image/logo_LaDiscorde.png";
+
     const userItem = document.createElement("div");
     userItem.classList.add("user-item");
     userItem.id = `user-${userId}`;
     userItem.innerHTML = `
       <div class="user-avatar">
-        ${user.pseudo.charAt(0).toUpperCase()}
+        <img src="${avatarSrc}" alt="avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
         <div class="online-badge"></div>
       </div>
       <div class="user-name">${user.pseudo}</div>
     `;
-    
+
     userItem.addEventListener("click", () => {
       ouvrirMessagePrive(user.pseudo, userId);
     });
-    
+
     usersList.appendChild(userItem);
   });
-  
   // Mettre à jour le compteur
   document.getElementById("online-count").textContent = utilisateursEnLigne.size - 1;
 }
@@ -439,7 +441,7 @@ socket.addEventListener("message", (event) => {
   if (data.type === "online_users") {
     utilisateursEnLigne = new Map();
     data.users.forEach(user => {
-      utilisateursEnLigne.set(user.userId, { pseudo: user.pseudo });
+      utilisateursEnLigne.set(user.userId, { pseudo: user.pseudo, avatar: user.avatar });
     });
     afficherUtilisateurs();
     return;
@@ -493,6 +495,100 @@ afficherMessagePrives();
 
 // Initialiser l'état du channelsList
 channelsList.style.display = "none";
+
+// PARAMÈTRES PROFIL (modal)
+const btnSettings = document.getElementById("btn-settings");
+const modalSettings = document.getElementById("modal-settings");
+const closeSettings = document.getElementById("close-settings");
+const avatarChoices = document.querySelectorAll(".avatar-choice");
+const avatarDiv = document.querySelector(".sidebar-footer .avatar");
+const avatarUpload = document.getElementById("avatar-upload");
+const importedAvatarPreview = document.getElementById("imported-avatar-preview");
+const userDescription = document.getElementById("user-description");
+
+btnSettings.addEventListener("click", () => {
+  modalSettings.style.display = "flex";
+  // Charger description si déjà enregistrée
+  userDescription.value = localStorage.getItem("userDescription") || "";
+});
+closeSettings.addEventListener("click", () => {
+  modalSettings.style.display = "none";
+  localStorage.setItem("userDescription", userDescription.value);
+});
+window.addEventListener("click", (e) => {
+  if (e.target === modalSettings) {
+    modalSettings.style.display = "none";
+    localStorage.setItem("userDescription", userDescription.value);
+  }
+});
+userDescription.addEventListener("input", () => {
+  localStorage.setItem("userDescription", userDescription.value);
+});
+avatarChoices.forEach(img => {
+  img.addEventListener("click", async () => {
+    avatarChoices.forEach(i => i.classList.remove("selected"));
+    img.classList.add("selected");
+    // Envoi au serveur même pour un avatar de base
+    try {
+      const res = await fetch("/upload-avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: monUserId, baseAvatar: img.dataset.avatar })
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        avatarDiv.innerHTML = `<img src='${data.url}' alt='Avatar' style='width:32px;height:32px;border-radius:50%;object-fit:cover;'>`;
+        localStorage.setItem("userAvatar", data.url);
+      } else {
+        alert("Erreur lors du choix de l'avatar");
+      }
+    } catch (err) {
+      alert("Erreur lors du choix de l'avatar");
+    }
+    modalSettings.style.display = "none";
+  });
+});
+// Import d'image personnalisée (synchronisation serveur)
+avatarUpload.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(ev) {
+    importedAvatarPreview.src = ev.target.result;
+    importedAvatarPreview.style.display = "inline-block";
+    importedAvatarPreview.classList.add("selected");
+    avatarChoices.forEach(i => i.classList.remove("selected"));
+    // Envoi au serveur
+    try {
+      const res = await fetch("/upload-avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: monUserId, imageBase64: ev.target.result })
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        avatarDiv.innerHTML = `<img src='${data.url}' alt='Avatar' style='width:32px;height:32px;border-radius:50%;object-fit:cover;'>`;
+        // Optionnel : stocker l'URL pour affichage local immédiat
+        localStorage.setItem("userAvatar", data.url);
+      } else {
+        alert("Erreur lors de l'upload de l'avatar");
+      }
+    } catch (err) {
+      alert("Erreur lors de l'upload de l'avatar");
+    }
+    modalSettings.style.display = "none";
+  };
+  reader.readAsDataURL(file);
+});
+// Affichage avatar/description au chargement
+window.addEventListener("DOMContentLoaded", () => {
+  const savedAvatar = localStorage.getItem("userAvatar");
+  if (savedAvatar) {
+    avatarDiv.innerHTML = `<img src='${savedAvatar}' alt='Avatar' style='width:32px;height:32px;border-radius:50%;object-fit:cover;'>`;
+  }
+  const savedDesc = localStorage.getItem("userDescription");
+  if (savedDesc) userDescription.value = savedDesc;
+});
 
 } //fin du if(estPageChat)
 

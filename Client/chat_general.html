@@ -32,7 +32,32 @@
       <div class="sidebar-footer">
         <div class="avatar"></div>
         <span class="pseudo" id="pseudo-connecte">...</span>
+        <button class="btn-settings" id="btn-settings" title="Paramètres" style="margin:0 8px;">
+          <img src="/Ressource/Image/logo_LaDiscorde.png" alt="Paramètres" style="width:24px;height:24px;vertical-align:middle;filter:grayscale(1);">
+        </button>
         <button class="btn-deco" onclick="deconnecter()" title="Se déconnecter">⏻</button>
+      </div>
+
+      <!-- MODAL PARAMÈTRES PROFIL -->
+      <div id="modal-settings" class="modal-settings" style="display:none;">
+        <div class="modal-content modal-flex">
+          <span class="close-modal" id="close-settings">&times;</span>
+          <div class="settings-left">
+            <h2>Description</h2>
+            <textarea id="user-description" placeholder="Écris une petite description..." maxlength="200"></textarea>
+          </div>
+          <div class="settings-right">
+            <h2>Photo de profil</h2>
+            <div class="avatars-list">
+              <img src="/Ressource/Image/imageprofil/pfp.jpg" class="avatar-choice selected" data-avatar="/Ressource/Image/imageprofil/pfp.jpg" alt="Avatar 1">
+              <img src="/Ressource/Image/imageprofil/pfp2.jpg" class="avatar-choice" data-avatar="/Ressource/Image/imageprofil/pfp2.jpg" alt="Avatar 2">
+              <img src="/Ressource/Image/imageprofil/pfp4.jpeg" class="avatar-choice" data-avatar="/Ressource/Image/imageprofil/pfp4.jpeg" alt="Avatar 3">
+              <img id="imported-avatar-preview" style="display:none;" class="avatar-choice" alt="Avatar importé">
+            </div>
+            <input type="file" id="avatar-upload" accept="image/*" style="margin-top:12px;">
+            <label for="avatar-upload" class="import-btn">Importer une image</label>
+          </div>
+        </div>
       </div>
     </aside>
 

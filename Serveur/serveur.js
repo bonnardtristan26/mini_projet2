@@ -20,6 +20,7 @@ import bcrypt from "bcrypt";
 import mysql from "mysql2/promise";
 import session from "express-session";
 import nodemailer from "nodemailer";
+import fs from "fs";
 
 // ══════════════════════════════════════════════════════════════════════════════════
 // CONFIGURATION DE BASE
@@ -84,17 +85,28 @@ const clientSessions = new Map();
 const utilisateursEnLigne = new Map();
 
 // Fonction pour diffuser la liste des utilisateurs en ligne à tous les clients
+function getAvatarUrl(userId) {
+  const base = path.join(__dirname, `../Ressource/Image/imageprofil/`);
+  const exts = ["png", "jpg", "jpeg"];
+  for (const ext of exts) {
+    const file = path.join(base, `${userId}.${ext}`);
+    if (fs.existsSync(file)) {
+      return `/Ressource/Image/imageprofil/${userId}.${ext}`;
+    }
+  }
+  return "/Ressource/Image/logo_LaDiscorde.png";
+}
+
 function diffuserUtilisateurs() {
   const users = Array.from(utilisateursEnLigne.values()).map(user => ({
     userId: user.userId,
-    pseudo: user.pseudo
+    pseudo: user.pseudo,
+    avatar: getAvatarUrl(user.userId)
   }));
-  
   const message = JSON.stringify({
     type: "online_users",
     users: users
   });
-  
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(message);
@@ -432,6 +444,36 @@ app.post("/sauvegarder-message", async (req, res) => {
     } catch (err) {
         console.error("Erreur sauvegarde message :", err);
         return res.json({ success: false, message: "Erreur serveur." });
+    }
+});
+
+// Route pour upload d'avatar (POST /upload-avatar)
+app.post("/upload-avatar", async (req, res) => {
+    try {
+        const { userId, imageBase64, baseAvatar } = req.body;
+        if (!userId) return res.status(400).json({ success: false, message: "Données manquantes" });
+        // Si baseAvatar est fourni, copier l'image de base
+        if (baseAvatar) {
+            const ext = baseAvatar.split('.').pop();
+            const dest = path.join(__dirname, `../Ressource/Image/imageprofil/${userId}.${ext}`);
+            // Correction du chemin source
+            const src = path.join(__dirname, `..${baseAvatar}`);
+            if (!fs.existsSync(src)) return res.status(400).json({ success: false, message: "Fichier source introuvable" });
+            fs.copyFileSync(src, dest);
+            return res.json({ success: true, url: `/Ressource/Image/imageprofil/${userId}.${ext}` });
+        }
+        // Sinon, imageBase64 (upload personnalisé)
+        if (!imageBase64) return res.status(400).json({ success: false, message: "Aucune image fournie" });
+        const matches = imageBase64.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/);
+        if (!matches) return res.status(400).json({ success: false, message: "Format image invalide" });
+        const ext = matches[1] === "jpeg" ? "jpg" : matches[1];
+        const buffer = Buffer.from(matches[2], "base64");
+        const filePath = path.join(__dirname, `../Ressource/Image/imageprofil/${userId}.${ext}`);
+        fs.writeFileSync(filePath, buffer);
+        return res.json({ success: true, url: `/Ressource/Image/imageprofil/${userId}.${ext}` });
+    } catch (err) {
+        console.error("Erreur upload avatar:", err);
+        return res.status(500).json({ success: false, message: "Erreur serveur" });
     }
 });
 
