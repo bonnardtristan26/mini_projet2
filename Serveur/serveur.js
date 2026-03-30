@@ -272,11 +272,11 @@ app.post("/inscription", async (req, res) => {
         </html>`;
 
 //en voie mail
-await fetch("https://api.brevo.com/v3/smtp/email", {
+const brevoResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
         "Content-Type": "application/json",
-        "api-key": "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"
+        "api-key": "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"
     },
     body: JSON.stringify({
         sender: { name: "LaDiscorde", email: "ztoxyu@gmail.com" },
@@ -285,6 +285,9 @@ await fetch("https://api.brevo.com/v3/smtp/email", {
         htmlContent: htmlMail
     })
 });
+
+const brevoResult = await brevoResponse.json();
+console.log("Réponse Brevo :", JSON.stringify(brevoResult));
 
         console.log(`Mail de vérification envoyé à : ${email} (user: ${username})`);
         return res.json({ success: true, message: "Compte créé ! Vérifie tes emails." });

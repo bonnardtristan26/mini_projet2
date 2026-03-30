@@ -1,3 +1,7 @@
+const estPageChat = !!document.getElementById("messages");
+
+if (estPageChat) {
+
 const socket = new WebSocket(`ws://${window.location.hostname}:3000`);
 
 const messagesDiv = document.getElementById("messages");
@@ -490,17 +494,31 @@ afficherMessagePrives();
 // Initialiser l'état du channelsList
 channelsList.style.display = "none";
 
-
+} //fin du if(estPageChat)
 
 
 //partie mdp
 
 // ─── Fonction : hacher une chaîne en SHA-256 (Web Crypto API, natif au navigateur) ───
 async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray  = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    // Compatible HTTP et HTTPS
+    if (window.crypto && window.crypto.subtle) {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray  = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } else {
+        // Fallback si crypto.subtle non disponible (HTTP)
+        let hash = 5381;
+        const str = message + "laDiscordeSalt2024xZ9";
+        for (let i = 0; i < str.length; i++) {
+            hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+            hash = hash & hash;
+        }
+        let hex = Math.abs(hash).toString(16);
+        while (hex.length < 64) hex = (hex + hex + hex).substring(0, 64);
+        return hex.substring(0, 64);
+    }
 }
 
 // ─── INSCRIPTION ───────────────────────────────────────────────────────────────────
