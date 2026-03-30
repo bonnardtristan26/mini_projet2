@@ -1,6 +1,34 @@
-J'ai pu faire le diagramme de classe, repasser sur le logo LaDiscorde (4H), et repasser
-sur les IHM, j'ai pu commencer a faire les fichiers HTML client (créer un compte) (4H), ajout des fichiers php et modification du fichier javascript serveur et client afin
-que lors de la creation du compte, le client envoie une requête a Mariadb pour hasher
-* son mdp et qu'il soit stocker et puis lors de la connection le client envoie son 
-mdp hasher au serveur, le serveur stock le (bcrypt), une fois la connection réussite
-alors il envoie a la page de chat (travaille personnel)
+## 1. Conception & Design (4H)
+- Création du diagramme de classe UML
+- Refonte et optimisation du logo LaDiscorde
+- Redesign complet des interfaces utilisateur (IHM)
+
+## 2. Système d'Authentification & Inscription (4H)
+- Création des fichiers HTML (page inscription)
+- Mise en place des fichiers PHP backend
+- Hachage sécurisé des mots de passe (bcrypt)
+- Ajout des colonnes MariaDB : id, username, email, password_hash, token_verif, email_verifi, date_creation
+- Génération automatique d'un token unique par compte
+- Intégration API Brevo pour envoi de mails de vérification
+- Vérification obligatoire de l'email avant connexion
+
+## 3. Modifications Client-Serveur
+- Mise à jour partieClient.js et serveur.js
+- Communication sécurisée des identifiants avec MariaDB
+- Système de cookies pour maintenir la session de connexion
+- Vérification d'authentification à chaque requête
+
+## 4. Page Chat Générale
+- Création de l'interface HTML du chat
+- Affichage différencié des messages (envoyé à droite, reçu à gauche)
+- Intégration du fond d'écran "LaDiscorde"
+- Séparation des messages par utilisateur avec pseudo
+
+## 5. Correction de Bugs
+- Résolution du problème d'accès au chat après push
+- Implémentation du système de cookies de session
+- Migration du système d'email (Resend → Brevo)
+
+## 6.
+-avancer sur le chat générale la discorde, affichage utilisateur avec une nouvelle page base données
+pour les messages soit privée soit publiques, possibilité de voir et de parler avec les utilisateurs connecté 

@@ -3,48 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <title>Chat WebSocket</title>
-  <link rel="stylesheet" href="chat_general.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<style>
 
-  @font-face {
-    font-family: "LoserMotoClub";
-    src: url('../Ressource/Front/LoserMotoClub.ttf');
-  }
-  #messages {
-    font-family: "LoserMotoClub", sans-serif;
-  }
+  <!-- BARRE DU HAUT -->
+  <header class="topbar">
+    <p class="app-title">LaDiscorde</p>
+    <img src="/Ressource/Image/logo_LaDiscorde.png" alt="Logo LaDiscorde">
+  </header>
 
-</style>
+  <div class="layout">
 
-<style>
-@font-face {
-  font-family: "LoserMotoClub";
-  src: url('../Ressource/Front/LoserMotoClub.ttf');
-}
-.title {
-  font-family: "LoserMotoClub", sans-serif;
-}
-</style>
+    <!-- COLONNE SERVEURS (À GAUCHE) -->
+    <aside class="servers-sidebar">
+      <div class="servers-icons" id="servers-icons">
+        <!-- Serveurs seront ajoutés ici en JS -->
+      </div>
+    </aside>
 
-<!-- BARRE DU HAUT -->
-<div style="position: fixed; top: 0; left: 0; width: 100%; height: 40px; background: rgba(10,10,10,0.90); 
-border-bottom: 1px solid rgba(200,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 100;">
-  <p class="title" style="font-size: 18px; margin: 0; color: white; letter-spacing: 2px;">LaDiscorde</p>
-  <img src="../Ressource/Image/logo_LaDiscorde.png" style="width: 26px; height: auto; position: absolute; right: 16px;" alt="Logo LaDiscorde">
-</div>
+    <!-- COLONNE CENTRALE (MP OU SALONS) -->
+    <aside class="sidebar" id="center-sidebar">
+      <div class="sidebar-header" id="sidebar-header">Messages privés</div>
+      <div class="sidebar-list">
+        <div id="mp-list"></div>
+        <div id="channels-list"></div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="avatar"></div>
+        <span class="pseudo" id="pseudo-connecte">...</span>
+        <button class="btn-deco" onclick="deconnecter()" title="Se déconnecter">⏻</button>
+      </div>
+    </aside>
 
-<h1 class="title" style="font-size: 18px; margin: 0; color: black; letter-spacing: 0px;">Chat en ligne</h1>
+    <!-- ZONE CHAT PRINCIPALE -->
+    <main class="chat-zone">
+      <div class="chat-header">
+        <span>👤</span> Messages privés
+      </div>
+      <div id="messages" style="display:none;"></div>
+      <div id="welcome-zone" class="welcome-container">
+        <img src="/Ressource/Image/logo_LaDiscorde.png" alt="LaDiscorde" class="welcome-logo">
+        <h1>Bienvenue dans LaDiscorde</h1>
+        <p>Sélectionne un utilisateur à droite pour commencer une discussion privée ou choisis un serveur à gauche</p>
+      </div>
+      <div id="input-zone" style="display:none;">
+        <input type="text" id="messageInput" placeholder="Écris un message...">
+        <button id="sendBtn" class="title">Envoyer</button>
+      </div>
+    </main>
 
-<div id="messages"></div>
+    <!-- PANNEAU UTILISATEURS EN LIGNE -->
+    <aside class="users-panel">
+      <div class="users-header">
+        <h3>En ligne</h3>
+        <span class="online-count" id="online-count">0</span>
+      </div>
+      <div class="users-list" id="users-list"></div>
+    </aside>
 
-<div id="input-zone">
-  <input type="text" id="messageInput" placeholder="Écris un message..." class="texts" style="font-size: 15px; margin: 0; color: black; letter-spacing: 0px;">
-  <button id="sendBtn" class="title">Envoyer</button>
-</div>
+  </div>
 
-<script src="partieClient.js"></script>
+  <!-- BARRE DU BAS -->
+  <footer class="bottombar">
+    <p>Chat général — LaDiscorde</p>
+  </footer>
+
+  <script>
+    // Vérification session
+    fetch('/verifier-session')
+      .then(r => r.json())
+      .then(data => {
+        if (!data.connecte) {
+          window.location.href = "login.html";
+        } else {
+          document.getElementById('pseudo-connecte').textContent = data.username;
+        }
+      });
+
+    // Déconnexion
+    async function deconnecter() {
+      await fetch('/deconnexion', { method: 'POST' });
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <script src="partieClient.js"></script>
+
 </body>
 </html>
-

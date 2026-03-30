@@ -1,1 +1,15 @@
-Création du squellette du code et de l'IHM
+## 1. Création du squelette du code et de l'IHM 
+Structure HTML5 complète : topbar, sidebar avec canaux, zone chat, messages, input
+Layout full-screen responsif avec flexbox
+
+## 2. Renvoie automatique à la page de connexion si non connecté 
+Vérification de session via fetch('/verifier-session')
+Redirection automatique vers login.html si !connecte
+Affichage du pseudo utilisateur si connecté
+
+## 3. Refonte du design complet 
+Thème dark Discord-like : fond noir #111214, accent rouge #c0000e
+Sidebar, serveurs, messages avec couleurs distinctes (reçu/envoyé)
+Animations smooth (fadeIn, slideDown, pulse)
+Formulaires centrés avec inputs et boutons stylisés
+Media queries pour responsive design

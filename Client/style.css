@@ -1,0 +1,1055 @@
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+/* LADISCORDE - GLOBAL STYLESHEET                                                  */
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────── */
+/* FONTS */
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+@font-face {
+    font-family: "LoserMotoClub";
+    src: url('../Ressource/Front/LoserMotoClub.ttf');
+}
+
+@font-face {
+    font-family: "MaPolice";
+    src: url('../Ressource/Front/DRExclusiveEditorial.ttf');
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────── */
+/* RESET & BASE STYLES */
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: "MaPolice", sans-serif;
+    background-color: #0a0a0a;
+    background-image: url("../Ressource/Image/fond_LaDiscorde.png");
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-position-y: 20%;
+    background-attachment: fixed;
+    color: white;
+    overflow: hidden;
+}
+
+body.menu-page {
+    display: flex;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────── */
+/* SIDEBAR STYLES (Menu Principal Only) */
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+.sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, rgba(20, 10, 10, 0.95) 0%, rgba(10, 5, 5, 0.95) 100%);
+    border-right: 2px solid rgba(255, 0, 0, 0.3);
+    overflow-y: auto;
+    padding: 15px 0;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.sidebar-header {
+    padding: 20px 15px;
+    border-bottom: 1px solid rgba(255, 0, 0, 0.2);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar-header img {
+    width: 35px;
+    height: auto;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.sidebar-header .title {
+    font-family: "LoserMotoClub", sans-serif;
+    font-size: 18px;
+    letter-spacing: 1px;
+    flex: 1;
+    color: white;
+}
+
+.sidebar-item {
+    padding: 12px 15px;
+    margin: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: rgba(200, 200, 200, 0.8);
+    text-decoration: none;
+}
+
+.sidebar-item:hover {
+    background: rgba(255, 0, 0, 0.4);
+    color: white;
+    transform: translateX(5px);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+}
+
+.sidebar-item.active {
+    background: rgba(255, 0, 0, 0.6);
+    color: white;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────── */
+/* MAIN CONTENT & LAYOUT */
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(10, 10, 10, 0.5);
+    height: 100vh;
+    overflow: hidden;
+}
+
+.header {
+    height: auto;
+    background: rgba(15, 15, 15, 0.9);
+    border-bottom: 2px solid rgba(255, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.header-title {
+    font-family: "LoserMotoClub", sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: white;
+}
+
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+    animation: fadeIn 0.5s ease;
+}
+
+/* Grid layout for menu principal cards - NOT login/signup */
+.content:not(.login-page):not(.signup-page) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    justify-content: auto;
+    align-items: auto;
+}
+
+/* Centrage des formulaires de connexion/inscription */
+.content.login-page,
+.content.signup-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────── */
+/* CARD STYLES (Menu Principal) */
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+.card {
+    background: linear-gradient(135deg, rgba(40, 20, 20, 0.9) 0%, rgba(20, 10, 10, 0.9) 100%);
+    border: 2px solid rgba(255, 0, 0, 0.4);
+    border-radius: 12px;
+    padding: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    text-decoration: none;
+    color: inherit;
+}
+
+.card:hover {
+    background: linear-gradient(135deg, rgba(60, 30, 30, 0.95) 0%, rgba(40, 20, 20, 0.95) 100%);
+    border-color: rgba(255, 0, 0, 0.7);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+}
+
+.card-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.card-desc {
+    font-size: 12px;
+    color: rgba(200, 200, 200, 0.7);
+    line-height: 1.5;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────── */
+/* FORM STYLES (Login & Inscription) */
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+.login-container,
+.signup-container {
+    background: linear-gradient(135deg, rgba(40, 20, 20, 0.95) 0%, rgba(20, 10, 10, 0.95) 100%);
+    border: 2px solid rgba(255, 0, 0, 0.4);
+    border-radius: 15px;
+    padding: 40px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: slideDown 0.5s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.login-title,
+.signup-title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.form-logo {
+    width: 150px;
+    height: auto;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.3));
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: rgba(200, 200, 200, 0.9);
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    border-radius: 8px;
+    color: white;
+    font-family: "MaPolice", sans-serif;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 0, 0, 0.6);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
+}
+
+.form-group input::placeholder {
+    color: rgba(200, 200, 200, 0.4);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────── */
+/* BUTTON STYLES */
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+.btn-login,
+.btn-signup {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.8) 0%, rgba(200, 0, 0, 0.8) 100%);
+    border: 1px solid rgba(255, 0, 0, 0.9);
+    border-radius: 8px;
+    color: white;
+    font-family: "LoserMotoClub", sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 20px;
+}
+
+.btn-login:hover,
+.btn-signup:hover {
+    background: linear-gradient(135deg, rgba(255, 0, 0, 0.95) 0%, rgba(220, 0, 0, 0.95) 100%);
+    box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+    transform: translateY(-2px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────── */
+/* LINK STYLES */
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+.login-links,
+.signup-links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    font-size: 13px;
+    gap: 10px;
+}
+
+.login-links a {
+    color: rgba(200, 200, 200, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+.login-links a:hover {
+    color: white;
+    border-color: rgba(255, 0, 0, 0.5);
+    background: rgba(255, 0, 0, 0.1);
+}
+
+.signup-links p {
+    margin: 0;
+    color: rgba(200, 200, 200, 0.8);
+    text-align: center;
+}
+
+.signup-links a {
+    color: white;
+    text-decoration: none;
+    background: rgba(255, 0, 0, 0.3);
+    padding: 4px 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.signup-links a:hover {
+    background: rgba(255, 0, 0, 0.5);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────── */
+/* BACK BUTTON (Login & Inscription) */
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+.back-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    background: rgba(255, 0, 0, 0.6);
+    border: 1px solid rgba(255, 0, 0, 0.8);
+    border-radius: 8px;
+    color: white;
+    font-family: "MaPolice", sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 50;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.back-btn:hover {
+    background: rgba(255, 0, 0, 0.8);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+    transform: translateX(-2px);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────── */
+/* SCROLLBAR STYLES */
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 0, 0, 0.5);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 0, 0, 0.7);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────── */
+/* RESPONSIVE DESIGN */
+/* ─────────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    /* Menu Principal */
+    body.menu-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 2px solid rgba(255, 0, 0, 0.3);
+        height: auto;
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 10px;
+    }
+
+    .sidebar-header {
+        border: none;
+        margin-bottom: 0;
+        padding: 0 15px;
+    }
+
+    .sidebar-item {
+        white-space: nowrap;
+        min-width: 120px;
+        padding: 10px 12px;
+        margin: 0 5px;
+    }
+
+    /* Forms */
+    .login-container,
+    .signup-container {
+        max-width: 100%;
+        padding: 30px 20px;
+    }
+
+    .header {
+        height: 50px;
+        padding: 0 15px;
+    }
+
+    .header-title {
+        font-size: 18px;
+    }
+
+    .content {
+        padding: 20px;
+        grid-template-columns: 1fr;
+        margin-top: 0;
+    }
+
+    .back-btn {
+        top: 10px;
+        bottom: auto;
+        padding: 8px 15px;
+        font-size: 12px;
+    }
+
+    .form-logo {
+        width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 100%;
+        max-height: 70px;
+    }
+
+    .login-title,
+    .signup-title {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-size: 12px;
+    }
+
+    .form-group input {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .content {
+        padding: 15px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .card-icon {
+        font-size: 40px;
+    }
+
+    .card-title {
+        font-size: 16px;
+    }
+
+    .card-desc {
+        font-size: 11px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+/* CHAT GENERAL STYLES */
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+
+body.chat-body {
+    background: #111214;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ── BARRE DU HAUT ── */
+.topbar {
+    position: fixed; top: 0; left: 0; width: 100%; height: 40px;
+    background: rgba(10,10,10,0.95);
+    border-bottom: 1px solid rgba(200,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+}
+.topbar .app-title {
+    font-family: "LoserMotoClub", sans-serif;
+    font-size: 18px; letter-spacing: 2px; color: white;
+}
+.topbar img { width: 26px; height: auto; position: absolute; right: 16px; }
+
+/* ── LAYOUT ── */
+.layout {
+    display: flex;
+    height: calc(100vh - 80px);
+    gap: 0;
+    padding-top: 40px;
+}
+
+/* ── SERVEURS ── */
+.servers {
+    width: 60px;
+    background: #0e0e0f;
+    border-right: 1px solid rgba(200,0,0,0.15);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 12px 0; gap: 10px; overflow-y: auto;
+}
+.server-icon {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #1a1a1c;
+    border: 1px solid rgba(200,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 16px;
+    transition: border-color 0.2s, background 0.2s;
+}
+.server-icon:hover, .server-icon.active {
+    border-color: rgba(200,0,0,0.8);
+    background: rgba(180,0,0,0.2);
+}
+.server-icon img { width: 28px; height: 28px; border-radius: 50%; }
+
+/* ── SIDEBAR CHAT ── */
+.layout .sidebar {
+    width: 200px;
+    background: #161618;
+    border-right: 1px solid rgba(200,0,0,0.15);
+    display: flex; flex-direction: column;
+}
+.layout .sidebar .sidebar-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(200,0,0,0.15);
+    font-size: 11px; font-weight: bold; letter-spacing: 1px;
+    color: rgba(200,200,200,0.5);
+    text-transform: uppercase;
+}
+.sidebar-list { flex: 1; overflow-y: auto; padding: 8px 0; display: flex; flex-direction: column; }
+.channel-item {
+    padding: 7px 14px; cursor: pointer; font-size: 13px;
+    color: rgba(180,180,180,0.6);
+    display: flex; align-items: center; gap: 8px;
+    border-radius: 4px; margin: 0 6px;
+    transition: background 0.15s, color 0.15s;
+}
+.channel-item:hover { background: rgba(200,0,0,0.1); color: white; }
+.channel-item.active { background: rgba(200,0,0,0.15); color: #ff4444; }
+
+.mp-logo {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    object-fit: contain;
+}
+
+/* ── SERVERS SIDEBAR (GAUCHE) ── */
+.servers-sidebar {
+    width: 70px;
+    background: #161618;
+    border-right: 1px solid rgba(200,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.servers-icons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 0;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.server-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #1a1a1c;
+    border: 2px solid rgba(200,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.server-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.server-icon:hover {
+    border-color: rgba(200,0,0,0.6);
+    background: rgba(180,0,0,0.15);
+    transform: scale(1.05);
+}
+
+.server-icon.active {
+    border-color: rgba(255,0,0,0.8);
+    background: rgba(200,0,0,0.25);
+    box-shadow: 0 0 15px rgba(255,0,0,0.3);
+}
+
+/* ── SIDEBAR CENTRAL (MP OU SALONS) ── */
+.layout .sidebar {
+    width: 200px;
+    background: #161618;
+    border-right: 1px solid rgba(200,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    height: auto;
+}
+
+.layout .sidebar .sidebar-header {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(200,0,0,0.15);
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: rgba(200,200,200,0.5);
+    text-transform: uppercase;
+}
+
+#channels-list {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.salon-item {
+    padding: 7px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    color: rgba(180,180,180,0.6);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 4px;
+    margin: 0 6px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.salon-item:hover {
+    background: rgba(200,0,0,0.1);
+    color: white;
+}
+
+.salon-item.active {
+    background: rgba(200,0,0,0.15);
+    color: #ff4444;
+}
+
+.sidebar-footer {
+    width: 100%;
+    padding: 10px 12px;
+    border-top: 1px solid rgba(200,0,0,0.15);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    background: #161618;
+    flex-shrink: 0;
+}
+.sidebar-footer .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(200,0,0,0.4), rgba(255,0,0,0.3));
+    border: 1px solid rgba(255,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.sidebar-footer .pseudo {
+    font-size: 12px;
+    color: rgba(200,200,200,0.8);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+.btn-deco {
+    background: rgba(200,0,0,0.3);
+    border: 1px solid rgba(200,0,0,0.5);
+    cursor: pointer;
+    color: rgba(255,0,0,0.8);
+    font-size: 14px;
+    transition: all 0.3s ease;
+    padding: 4px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+.btn-deco:hover {
+    color: white;
+    background: rgba(200,0,0,0.6);
+    border-color: rgba(255,0,0,0.9);
+    box-shadow: 0 0 15px rgba(255,0,0,0.4);
+}
+
+/* ── ZONE CHAT ── */
+.chat-zone {
+    flex: 1; display: flex; flex-direction: column;
+    background-color: #18191c;
+    background-image: url('/Ressource/Image/fond_LaDiscorde.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center 20%;
+}
+.chat-header {
+    padding: 10px 18px;
+    border-bottom: 1px solid rgba(200,0,0,0.2);
+    background: #111213;
+    font-size: 14px; color: rgba(200,200,200,0.8);
+    letter-spacing: 1px;
+    display: flex; align-items: center; gap: 8px;
+}
+.chat-header span { color: rgba(200,0,0,0.7); font-size: 16px; }
+
+/* ── MESSAGES ── */
+#messages {
+    flex: 1; overflow-y: auto;
+    padding: 20px 24px;
+    display: flex; flex-direction: column; gap: 8px;
+}
+#messages::-webkit-scrollbar { width: 4px; }
+#messages::-webkit-scrollbar-thumb { background: rgba(200,0,0,0.25); border-radius: 4px; }
+
+.message-row {
+    display: flex;
+    flex-direction: column;
+    max-width: 70%;
+    animation: fadeIn 0.18s ease;
+}
+.message-row.moi { align-self: flex-end; align-items: flex-end; }
+.message-row.autre { align-self: flex-start; align-items: flex-start; }
+
+.msg-pseudo {
+    font-size: 11px;
+    margin-bottom: 3px;
+    padding: 0 4px;
+}
+.message-row.moi .msg-pseudo { color: rgba(200,0,0,0.75); }
+.message-row.autre .msg-pseudo { color: rgba(180,180,180,0.6); }
+
+.msg-bubble {
+    padding: 10px 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+/* Bulle reçue — gauche */
+.message-row.autre .msg-bubble {
+    background: #222326;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 4px 16px 16px 16px;
+    color: #d8d8d8;
+}
+/* Bulle envoyée — droite */
+.message-row.moi .msg-bubble {
+    background: #3d0008;
+    border: 1px solid rgba(200,0,0,0.35);
+    border-radius: 16px 4px 16px 16px;
+    color: #f0d0d0;
+}
+
+/* ── ZONE SAISIE ── */
+#input-zone {
+    padding: 14px 20px;
+    background: #111213;
+    border-top: 1px solid rgba(200,0,0,0.2);
+    display: flex; gap: 10px; align-items: center;
+}
+#messageInput {
+    flex: 1; padding: 11px 16px;
+    background: #222326;
+    border: 1px solid rgba(200,0,0,0.25);
+    border-radius: 8px; color: white;
+    font-family: "MaPolice", sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s;
+}
+#messageInput:focus { border-color: rgba(200,0,0,0.6); }
+#messageInput::placeholder { color: rgba(150,150,150,0.4); }
+#sendBtn {
+    padding: 11px 24px;
+    background: #c0000e; border: none; border-radius: 8px;
+    color: white; font-family: "MaPolice", sans-serif;
+    font-size: 13px; font-weight: bold; letter-spacing: 1px;
+    cursor: pointer; transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+}
+#sendBtn:hover { background: #e0001a; }
+#sendBtn:active { transform: scale(0.97); }
+
+/* ── BARRE DU BAS ── */
+.bottombar {
+    position: fixed; bottom: 0; left: 0; width: 100%; height: 40px;
+    background: rgba(10,10,10,0.95);
+    border-top: 1px solid rgba(200,0,0,0.45);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200;
+}
+.bottombar p { color: rgba(200,200,200,0.6); font-size: 13px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+/* LAYOUT CHAT - USERS PANEL */
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+
+.layout {
+    display: flex;
+    height: calc(100vh - 40px);
+    gap: 0;
+}
+
+/* Panneau utilisateurs en ligne */
+.users-panel {
+    width: 280px;
+    background: linear-gradient(180deg, rgba(20, 10, 10, 0.95) 0%, rgba(10, 5, 5, 0.95) 100%);
+    border-left: 2px solid rgba(255, 0, 0, 0.3);
+    overflow-y: auto;
+    padding: 15px 0;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.users-header {
+    padding: 20px 15px;
+    border-bottom: 1px solid rgba(255, 0, 0, 0.2);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.users-header h3 {
+    font-family: "LoserMotoClub", sans-serif;
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: white;
+    margin: 0;
+    flex: 1;
+}
+
+.online-count {
+    background: rgba(255, 0, 0, 0.5);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.users-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 10px;
+}
+
+.user-item {
+    padding: 12px 15px;
+    margin: 5px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: rgba(200, 200, 200, 0.8);
+    text-decoration: none;
+}
+
+.user-item:hover {
+    background: rgba(255, 0, 0, 0.4);
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+}
+
+.user-item.active {
+    background: rgba(255, 0, 0, 0.6);
+    color: white;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(192, 0, 14, 0.5), rgba(200, 0, 0, 0.3));
+    border: 2px solid rgba(255, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.online-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background: #00ff00;
+    border: 2px solid rgba(20, 10, 10, 0.95);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+}
+
+.user-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Zone de bienvenue */
+.welcome-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: rgba(200, 200, 200, 0.7);
+    gap: 20px;
+}
+
+.welcome-logo {
+    width: 120px;
+    height: auto;
+    opacity: 0.6;
+    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.2));
+}
+
+.welcome-container h1 {
+    font-family: "LoserMotoClub", sans-serif;
+    font-size: 32px;
+    letter-spacing: 2px;
+    color: white;
+    margin: 0;
+}
+
+.welcome-container p {
+    font-size: 14px;
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+/* ── CHANNEL ITEMS (Messages privés dynamiques) ── */
+#mp-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}

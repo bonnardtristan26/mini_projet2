@@ -5,3 +5,10 @@ Tristan BONNARD
 1h : finalisation du cahier des charges
 30 minutes : prise en main des extensions GitHub et de GitHub Desktop
 2h30 : codage des soket client/serveur pour la communication, HTML et CSS d'une page test pour tester le chat général (effectif)
+
+27/03/2026 :
+
+1h30 : Procédure d'installation (lire le LISEZ MOI.md dans le dossier Procédure d'installation)
+2h30 : style de la page chat_general.html (création d'une classe pour les messages reçus afin de créer
+       une bordure qui sépare les messages, qui s'adapte a la taille des messages)
+       Tests sur le style des fonts et bannière du haut

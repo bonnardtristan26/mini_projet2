@@ -42,43 +42,101 @@
 
 &#x20;**3.** Pour WampServer, exécutez dans le fichier **FICHIERS EXECUTABLES** :
 
-&#x09;**vcredist\_arm.exe**
-
-&#x09;**vcredist\_x64.exe**
-
-&#x09;**vcredist\_x84.exe**
-
 &#x09;**wampserver3\_phpsysinfo3.4.5.exe**
 
+&#x20;   Ne faites pas l'installation maintenant, il va falloir installer les distributions de **Microsoft Visual Studio**.
+
+&#x20;   Pour ceci, ouvrez le lien suivant :
 
 
-&#x20;   Puis vous pourrez lancer Wampserver64.
+
+&#x20;   **https://wampserver.aviatechno.net/**
 
 
 
-&#x20;**4.** Ouvrez le fichier **node-v24.14.1-x64** puis exécutez **node-v24.14.1-x64.msi** et appuyez sur **Next** jusqu'à l'installation.
+&#x20;   Puis descendez tous en bas de la page jusqu'à trouver **All VC Redistributable Packages (x86\_x64) (32 \& 64bits) MD5**
+
+&#x20;   Si votre distribution Windows est en 32 bits, prenez celui juste au-dessus.
+
+&#x20;   Dézippez le dossier puis installez un à un les distributions **Microsoft VS.** Certaines distributions ne s'installeront pas
+
+&#x20;   mais ce n'est pas grave.
+
+&#x20;   Ensuite, installez le logiciel suivant qui vous permettra de savoir si tout à bien été installé :
+
+
+
+&#x20;   **https://wampserver.aviatechno.net/files/tools/check\_vcredist.exe**
+
+
+
+&#x20;   Puis vous pourrez continuer l'installation de Wampserver64.
+
+
+
+&#x20;**4.** Après l'installation de Wampserver64 faite, vous devrez importer la base de donnée.
+
+&#x20;   Dans la **Barre des tâches** de Windows, ouvrez le menu déroulant **Afficher les icônes cachées,** puis vérifiez si l'icône de WampServer
+
+&#x20;   est bien verte, sinon relancez WampServer.
+
+&#x20;   Ensuite, faites **clic gauche** sur cette icône, puis appuyez sur **Localhost.**
+
+
+
+&#x20;   Dans **Vos Alias**, cliquez sur **PhpMyAdmin (version de phpMyAdmin),** entrez le nom d'utilisateur **root** et le mot de passe **root**
+
+&#x20;   puis changez le chois du serveur de MySQL à **MariaDB.**
+
+&#x20;   Ensuite dans votre repository **GitHub,** récupérez le fichier **bdd.sql** dans le fichier **Serveur/BDD/**, puis allez dans
+
+&#x20;   l'onglet **Bases de données,** donnez un nom à votre base de donnée, puis cliquez sur **Créer.**
+
+
+
+&#x20;   Cliquez sur le nom de votre nouvelle base de donnée à gauche, puis allez dans l'onglet **Importer,** dans la rubrique 
+
+&#x20;   **Fichier à importer,** cliquez sur **Choisir un fichier** et choisissez le fichier **bdd.sql**, descendez tous en bas 
+
+&#x20;   de la page puis cliquez sur **Importer.**
+
+
+
+&#x20;   Votre base de donnée est maintenant importée.
+
+
+
+&#x20;**5.** Ouvrez le fichier **node-v24.14.1-x64** puis exécutez **node-v24.14.1-x64.msi** et appuyez sur **Next** jusqu'à l'installation.
 
 &#x20;   Il n'y a pas d'emplacement à changer ou quoi que ce soit.
 
 &#x09;
 
-&#x20;**5.** Une fois tout ça installé, changez l'IP contenue à la **ligne 122** du fichier **partieClient.js**
+&#x20;**6.** Il vous faudra aussi vous créer un compte **Brevo** afin de changer la **clé API** dans le code aux **lignes 70** et **72** du fichier **serveur.js**
 
-&#x20;   et remplacez-la par l'IPV4 de votre machine (trouvable en faisant **ipconfig** dans le **cmd**).
+&#x20;   Voici le lien pour le compte **Brevo** : 
 
+&#x20;   **https://app.brevo.com/settings/keys/smtp**
 
+&#x20;   Vous devrez vous créer un compte avant d'accéder au site. Une fois que c'est fait, vous devrez vous connecter, puis accéder
 
-&#x20;   **ATTENTION : NE MODIFIEZ PAS LE "ws://"**
+&#x20;   au menu **Clés API et MCP**, puis sur **Générer une nouvelle clé API**, nommez la et c'est bon !
 
-&#x20;   **ET LE ":3000" (sauf pour celle-ci si vous voulez changer le port sur lequel le serveur est host)**
+&#x09;
 
-&#x20;   **CHANGEZ UNIQUEMENT L'IP.**
+&#x20;   Si c'est la première fois que vous lancez le serveur sur votre machine, tapez les commandes suivantes :
 
+&#x09;**npm init -y**
 
+&#x09;**npm install express ws**
 
 &#x20;   Puis tapez la commande suivante dans le **cmd** :
 
 &#x09;**node serveur.js**
+
+
+
+&#x20;   Pour les fois suivantes, il vous suffit juste de taper la dernière commande pour lancer le serveur.
 
 
 
@@ -91,6 +149,10 @@
 &#x09;**Serveur lancé sur http://\[IP de votre machine]:3000**
 
 &#x20;
+
+&#x20;   Afin d'accéder ua menu principal, vous pouvez copier le lien suivant :
+
+&#x09;**http://localhost:3000/menu\_principal.html**
 
 &#x20;
 
