@@ -16,7 +16,7 @@ const serversIcons = document.getElementById("servers-icons");
 const channelsList = document.getElementById("channels-list");
 const sidebarHeader = document.getElementById("sidebar-header");
 const centerSidebar = document.getElementById("center-sidebar");
-const logo = document.getElementById('mon-logo');
+const logo = document.getElementById('logo_le_discorde');
 const musique = document.getElementById('musique-easter-egg');
 
 let monPseudo = "";
