@@ -88,35 +88,14 @@ function afficherMessages(messages) {
   
   messages.forEach(msg => {
     const estMoi = msg.pseudo === monPseudo;
-    const user = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === msg.pseudo);
-    let avatarSrc = user && user.avatar ? user.avatar : "/Ressource/Image/logo_LaDiscorde.png";
-    // Format de l'heure
-    let heure = msg.heure ? msg.heure : "";
-    if (heure) {
-      const date = new Date(heure);
-      heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-      heure = heure.replace(":", "h");
-    }
     const div = document.createElement("div");
     div.classList.add("message-row");
     div.classList.add(estMoi ? "moi" : "autre");
-    if (estMoi) {
-      div.innerHTML = `
-        <div class=\"msg-header\">
-          <div class=\"msg-heure\">${heure}</div>
-          <div class=\"msg-pseudo\">${msg.pseudo}</div>
-          <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
-        </div>
-        <div class=\"msg-bubble\">${msg.texte}</div>`;
-    } else {
-      div.innerHTML = `
-        <div class=\"msg-header\">
-          <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
-          <div class=\"msg-pseudo\">${msg.pseudo}</div>
-          <div class=\"msg-heure\">${heure}</div>
-        </div>
-        <div class=\"msg-bubble\">${msg.texte}</div>`;
-    }
+
+    div.innerHTML = `
+      <div class="msg-pseudo">${msg.pseudo}</div>
+      <div class="msg-bubble">${msg.texte}</div>`;
+
     messagesDiv.appendChild(div);
   });
   
@@ -249,8 +228,8 @@ function afficherSalons(salons, nomServeur) {
   channelsList.style.display = "flex";
   channelsList.innerHTML = "";
   
-  // Mettre à jour le header
-  sidebarHeader.innerHTML = nomServeur;
+  // Mettre à jour le titre sans écraser le bouton +
+  document.getElementById('sidebar-header-title').textContent = nomServeur;
   
   salons.forEach(salon => {
     const salonItem = document.createElement("div");
@@ -278,8 +257,8 @@ function afficherMessagePrives() {
   mpList.style.display = "flex";
   mpList.style.flexDirection = "column";
   
-  // Mettre à jour le header
-  sidebarHeader.innerHTML = "Messages privés";
+  // Mettre à jour le titre sans écraser le bouton +
+  document.getElementById('sidebar-header-title').textContent = "Messages privés";
   
   // Mise à jour visuelle des serveurs
   document.querySelectorAll(".server-icon").forEach(icon => {
@@ -304,6 +283,7 @@ function selectionnerSalon(salon, serveurId) {
     }
   });
 }
+
 // ═════════════════════════════════════════════════════════════════════════════
 // OUVERTURE D'UN MESSAGE PRIVÉ
 // ═════════════════════════════════════════════════════════════════════════════
@@ -477,34 +457,14 @@ socket.addEventListener("message", (event) => {
   }
 
   const estMoi = data.pseudo === monPseudo;
-  const user = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === data.pseudo);
-  let avatarSrc = user && user.avatar ? user.avatar : "/Ressource/Image/logo_LaDiscorde.png";
-  let heure = data.heure ? data.heure : "";
-  if (heure) {
-    const date = new Date(heure);
-    heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-    heure = heure.replace(":", "h");
-  }
   const div = document.createElement("div");
   div.classList.add("message-row");
   div.classList.add(estMoi ? "moi" : "autre");
-  if (estMoi) {
-    div.innerHTML = `
-      <div class=\"msg-header\">
-        <div class=\"msg-heure\">${heure}</div>
-        <div class=\"msg-pseudo\">${data.pseudo}</div>
-        <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
-      </div>
-      <div class=\"msg-bubble\">${data.texte}</div>`;
-  } else {
-    div.innerHTML = `
-      <div class=\"msg-header\">
-        <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
-        <div class=\"msg-pseudo\">${data.pseudo}</div>
-        <div class=\"msg-heure\">${heure}</div>
-      </div>
-      <div class=\"msg-bubble\">${data.texte}</div>`;
-  }
+
+  div.innerHTML = `
+    <div class="msg-pseudo">${data.pseudo}</div>
+    <div class="msg-bubble">${data.texte}</div>`;
+
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
@@ -515,15 +475,12 @@ socket.addEventListener("message", (event) => {
 
 sendBtn.addEventListener("click", () => {
   if (input.value.trim() !== "") {
-    const now = new Date();
-    const heure = now.toISOString();
     const message = {
       pseudo: monPseudo,
       userId: monUserId,
       texte: input.value.trim(),
       canal: canalActuel,
-      type: typeCanal,
-      heure
+      type: typeCanal
     };
     
     socket.send(JSON.stringify(message));
@@ -735,16 +692,81 @@ async function login() {
     }
 }
 
-// ─── CONNEXION ─────────────────────────────────────────────────────────────────────
-logo.addEventListener('click', () => {
-  if (musique.paused) {
-    // Si la musique est en pause, on la joue
-    musique.play();
-    logo.style.opacity = "0.7"; // Optionnel : petit feedback visuel quand ça joue
-  } else {
-    // Si elle joue déjà, on la met en pause et on revient au début
-    musique.pause();
-    musique.currentTime = 0; 
-    logo.style.opacity = "1";
+// ═════════════════════════════════════════════════════════════════════════════
+// GESTION DES GROUPES DE DISCUSSION
+// ═════════════════════════════════════════════════════════════════════════════
+
+function ouvrirModalGroupe() {
+  const modal = document.getElementById('modal-creer-groupe');
+  const champ = document.getElementById('champ-nom-groupe');
+  champ.value = '';
+  champ.style.border = '1px solid #444';
+  modal.style.display = 'flex';
+  champ.focus();
+}
+
+function fermerModalGroupe() {
+  document.getElementById('modal-creer-groupe').style.display = 'none';
+}
+
+async function validerCreationGroupe() {
+  const champ = document.getElementById('champ-nom-groupe');
+  const nom = champ.value.trim();
+
+  if (!nom) {
+    champ.style.border = '2px solid #c0000e';
+    champ.focus();
+    return;
   }
-});
+  champ.style.border = '1px solid #444';
+
+  try {
+    const res = await fetch('/groupes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nom })
+    });
+    const data = await res.json();
+    if (data.success) {
+      fermerModalGroupe();
+      await rafraichirGroupes();
+    } else {
+      alert('Erreur : ' + data.message);
+    }
+  } catch (e) {
+    alert('Le serveur ne répond pas.');
+  }
+}
+
+async function rafraichirGroupes() {
+  const groupesList = document.getElementById('groupes-list');
+  if (!groupesList) return;
+  groupesList.innerHTML = '';
+
+  try {
+    const res = await fetch('/groupes');
+    const data = await res.json();
+    if (data.success && Array.isArray(data.groupes)) {
+      data.groupes.forEach(groupe => {
+        const div = document.createElement('div');
+        div.className = 'sidebar-item';
+        div.textContent = '👥 ' + groupe.nom;
+        div.style.cursor = 'pointer';
+        div.onclick = () => changerCanal('GROUPE_' + groupe.id, 'groupe', groupe.nom);
+        groupesList.appendChild(div);
+      });
+    }
+  } catch (e) {
+    console.error('Erreur rafraîchirGroupes :', e);
+  }
+}
+
+// Exposer globalement (appelé depuis le HTML inline)
+window.ouvrirModalGroupe = ouvrirModalGroupe;
+window.fermerModalGroupe = fermerModalGroupe;
+window.validerCreationGroupe = validerCreationGroupe;
+
+// Initialisation au chargement
+if (estPageChat) {
+  rafraichirGroupes();
+}

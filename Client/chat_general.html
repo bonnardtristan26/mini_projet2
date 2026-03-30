@@ -2,8 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Chat WebSocket</title>
-  <link rel="icon" type="image/png" href="/Ressource/Image/logo_LaDiscorde_favicon.png">
+  <title>LaDiscorde</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,8 +10,8 @@
   <!-- BARRE DU HAUT -->
   <header class="topbar">
     <p class="app-title">LaDiscorde</p>
-    <img id = "logo_la_discorde" src="/Ressource/Image/logo_LaDiscorde.png" style="cursor: pointer;" alt = "LaDiscorde">
-    <audio id="musique-easter-egg" src="../Ressource/Audio/Playlist/OneHourofSovietMusic.mp3"></audio>
+    <img id="logo_la_discorde" src="/Ressource/Image/logo_LaDiscorde.png" style="cursor: pointer;" alt="LaDiscorde">
+    <audio id="musique-easter-egg" src="../Ressource/Audio/Playlist/OneHourofSovietMusic.m4a"></audio>
   </header>
 
   <div class="layout">
@@ -26,9 +25,20 @@
 
     <!-- COLONNE CENTRALE (MP OU SALONS) -->
     <aside class="sidebar" id="center-sidebar">
-      <div class="sidebar-header" id="sidebar-header">Messages privés</div>
+      <div class="sidebar-header" id="sidebar-header">
+        <span id="sidebar-header-title">Messages privés</span>
+        <!-- BOUTON GROUPE : ouvre la modale de création -->
+        <button
+          id="btn-creer-groupe"
+          title="Créer un groupe"
+          onclick="ouvrirModalGroupe()"
+          style="margin-left:auto; background:#c0000e; color:white; border:none; border-radius:50%; width:28px; height:28px; font-size:20px; line-height:1; cursor:pointer; flex-shrink:0;">
+          +
+        </button>
+      </div>
       <div class="sidebar-list">
         <div id="mp-list"></div>
+        <div id="groupes-list"></div>
         <div id="channels-list"></div>
       </div>
       <div class="sidebar-footer">
@@ -95,6 +105,22 @@
   <footer class="bottombar">
     <p>Chat général — LaDiscorde</p>
   </footer>
+
+  <!-- MODALE CRÉATION GROUPE (une seule, propre) -->
+  <div id="modal-creer-groupe" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:#1a1a1a; padding:25px; border-radius:12px; border:1px solid #c0000e; width:350px; box-shadow:0 0 20px rgba(0,0,0,0.5);">
+      <h2 style="color:white; margin-top:0; margin-bottom:20px; font-size:1.2rem;">Créer un nouveau groupe</h2>
+
+      <label style="color:#aaa; font-size:12px; display:block; margin-bottom:8px;">NOM DU GROUPE</label>
+      <input id="champ-nom-groupe" type="text" placeholder="Ex: Les métalleux"
+        style="width:100%; padding:12px; background:#333; border:1px solid #444; color:white; border-radius:5px; margin-bottom:20px; outline:none; box-sizing:border-box;">
+
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button onclick="fermerModalGroupe()" style="background:transparent; color:white; border:none; cursor:pointer; padding:8px 15px;">Annuler</button>
+        <button onclick="validerCreationGroupe()" style="background:#c0000e; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">Créer le groupe</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // Vérification session
