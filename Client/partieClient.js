@@ -88,14 +88,35 @@ function afficherMessages(messages) {
   
   messages.forEach(msg => {
     const estMoi = msg.pseudo === monPseudo;
+    const user = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === msg.pseudo);
+    let avatarSrc = user && user.avatar ? user.avatar : "/Ressource/Image/logo_LaDiscorde.png";
+    // Format de l'heure
+    let heure = msg.heure ? msg.heure : "";
+    if (heure) {
+      const date = new Date(heure);
+      heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      heure = heure.replace(":", "h");
+    }
     const div = document.createElement("div");
     div.classList.add("message-row");
     div.classList.add(estMoi ? "moi" : "autre");
-
-    div.innerHTML = `
-      <div class="msg-pseudo">${msg.pseudo}</div>
-      <div class="msg-bubble">${msg.texte}</div>`;
-
+    if (estMoi) {
+      div.innerHTML = `
+        <div class=\"msg-header\">
+          <div class=\"msg-heure\">${heure}</div>
+          <div class=\"msg-pseudo\">${msg.pseudo}</div>
+          <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+        </div>
+        <div class=\"msg-bubble\">${msg.texte}</div>`;
+    } else {
+      div.innerHTML = `
+        <div class=\"msg-header\">
+          <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+          <div class=\"msg-pseudo\">${msg.pseudo}</div>
+          <div class=\"msg-heure\">${heure}</div>
+        </div>
+        <div class=\"msg-bubble\">${msg.texte}</div>`;
+    }
     messagesDiv.appendChild(div);
   });
   
@@ -283,7 +304,6 @@ function selectionnerSalon(salon, serveurId) {
     }
   });
 }
-
 // ═════════════════════════════════════════════════════════════════════════════
 // OUVERTURE D'UN MESSAGE PRIVÉ
 // ═════════════════════════════════════════════════════════════════════════════
@@ -457,14 +477,34 @@ socket.addEventListener("message", (event) => {
   }
 
   const estMoi = data.pseudo === monPseudo;
+  const user = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === data.pseudo);
+  let avatarSrc = user && user.avatar ? user.avatar : "/Ressource/Image/logo_LaDiscorde.png";
+  let heure = data.heure ? data.heure : "";
+  if (heure) {
+    const date = new Date(heure);
+    heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    heure = heure.replace(":", "h");
+  }
   const div = document.createElement("div");
   div.classList.add("message-row");
   div.classList.add(estMoi ? "moi" : "autre");
-
-  div.innerHTML = `
-    <div class="msg-pseudo">${data.pseudo}</div>
-    <div class="msg-bubble">${data.texte}</div>`;
-
+  if (estMoi) {
+    div.innerHTML = `
+      <div class=\"msg-header\">
+        <div class=\"msg-heure\">${heure}</div>
+        <div class=\"msg-pseudo\">${data.pseudo}</div>
+        <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+      </div>
+      <div class=\"msg-bubble\">${data.texte}</div>`;
+  } else {
+    div.innerHTML = `
+      <div class=\"msg-header\">
+        <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+        <div class=\"msg-pseudo\">${data.pseudo}</div>
+        <div class=\"msg-heure\">${heure}</div>
+      </div>
+      <div class=\"msg-bubble\">${data.texte}</div>`;
+  }
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
@@ -475,12 +515,15 @@ socket.addEventListener("message", (event) => {
 
 sendBtn.addEventListener("click", () => {
   if (input.value.trim() !== "") {
+    const now = new Date();
+    const heure = now.toISOString();
     const message = {
       pseudo: monPseudo,
       userId: monUserId,
       texte: input.value.trim(),
       canal: canalActuel,
-      type: typeCanal
+      type: typeCanal,
+      heure
     };
     
     socket.send(JSON.stringify(message));
@@ -691,6 +734,7 @@ async function login() {
         console.error(err);
     }
 }
+
 // ─── CONNEXION ─────────────────────────────────────────────────────────────────────
 logo.addEventListener('click', () => {
   if (musique.paused) {

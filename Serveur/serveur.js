@@ -458,10 +458,10 @@ app.post("/upload-avatar", async (req, res) => {
         if (baseAvatar) {
             const ext = baseAvatar.split('.').pop();
             const dest = path.join(__dirname, `../Ressource/Image/imageprofil/${userId}.${ext}`);
-            // Correction du chemin source
             const src = path.join(__dirname, `..${baseAvatar}`);
             if (!fs.existsSync(src)) return res.status(400).json({ success: false, message: "Fichier source introuvable" });
             fs.copyFileSync(src, dest);
+            diffuserUtilisateurs();
             return res.json({ success: true, url: `/Ressource/Image/imageprofil/${userId}.${ext}` });
         }
         // Sinon, imageBase64 (upload personnalisé)
@@ -472,6 +472,7 @@ app.post("/upload-avatar", async (req, res) => {
         const buffer = Buffer.from(matches[2], "base64");
         const filePath = path.join(__dirname, `../Ressource/Image/imageprofil/${userId}.${ext}`);
         fs.writeFileSync(filePath, buffer);
+        diffuserUtilisateurs();
         return res.json({ success: true, url: `/Ressource/Image/imageprofil/${userId}.${ext}` });
     } catch (err) {
         console.error("Erreur upload avatar:", err);
