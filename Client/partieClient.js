@@ -691,3 +691,16 @@ async function login() {
         console.error(err);
     }
 }
+// ─── CONNEXION ─────────────────────────────────────────────────────────────────────
+logo.addEventListener('click', () => {
+  if (musique.paused) {
+    // Si la musique est en pause, on la joue
+    musique.play();
+    logo.style.opacity = "0.7"; // Optionnel : petit feedback visuel quand ça joue
+  } else {
+    // Si elle joue déjà, on la met en pause et on revient au début
+    musique.pause();
+    musique.currentTime = 0; 
+    logo.style.opacity = "1";
+  }
+});
