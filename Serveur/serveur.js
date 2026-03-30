@@ -63,11 +63,11 @@ console.log("Connecté à MariaDB");
 // ── Config Gmail Brevo 
 const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false,
+    port: 465,
+    secure: true,
     auth: {
-        user: "a658f1001@smtp-brevo.com",
-        pass: "clefapibrevo"
+        user: "a6844a001@smtp-brevo.com",
+        pass: "xsmtpsib-7f7c0e038841866d3e7cf58567edc2b9bec46b3870d19c9245b8f9bc1a1742d6-YINoaJlLazUQpW9e"
     }
 });
 
@@ -272,11 +272,18 @@ app.post("/inscription", async (req, res) => {
         </html>`;
 
 //en voie mail
-await transporter.sendMail({
-    from: '"LaDiscorde" <ztoxyu@gmail.com>',
-    to: email,
-    subject: "Vérifie ton adresse email — LaDiscorde",
-    html: htmlMail
+await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "api-key": "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"
+    },
+    body: JSON.stringify({
+        sender: { name: "LaDiscorde", email: "ztoxyu@gmail.com" },
+        to: [{ email: email, name: username }],
+        subject: "Vérifie ton adresse email — LaDiscorde",
+        htmlContent: htmlMail
+    })
 });
 
         console.log(`Mail de vérification envoyé à : ${email} (user: ${username})`);
