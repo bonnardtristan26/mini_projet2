@@ -1,5 +1,9 @@
 const estPageChat = !!document.getElementById("messages");
 
+// Variables globales pour l'easter egg (peuvent exister ou être null)
+const logo = document.getElementById('logo_la_discorde');
+const musique = document.getElementById('musique-easter-egg');
+
 if (estPageChat) {
 
 const socket = new WebSocket(`ws://${window.location.hostname}:3000`);
@@ -16,8 +20,6 @@ const serversIcons = document.getElementById("servers-icons");
 const channelsList = document.getElementById("channels-list");
 const sidebarHeader = document.getElementById("sidebar-header");
 const centerSidebar = document.getElementById("center-sidebar");
-const logo = document.getElementById('logo_la_discorde');
-const musique = document.getElementById('musique-easter-egg');
 
 let monPseudo = "";
 let monUserId = "";
@@ -689,15 +691,3 @@ async function login() {
         console.error(err);
     }
 }
-
-// ─── EASTER EGG ─────────────────────────────────────────────────────────────────────
-logo.addEventListener('click', () => {
-  if (musique.paused) {
-    // Si la musique est en pause, on commence à la jouer dès que le logo est cliqué
-    musique.play();
-  } else {
-    // Sinon, on la met en pause
-    musique.pause();
-    musique.currentTime = 0; 
-  }
-});
