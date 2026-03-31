@@ -398,7 +398,7 @@ app.get("/historique/:canal/:type", async (req, res) => {
     const { canal, type } = req.params;
     
     // Vérifications
-    if (!['public', 'private'].includes(type)) {
+    if (!['public', 'private', 'group'].includes(type)) {
         return res.json({ success: false, message: "Type invalide." });
     }
     
@@ -461,6 +461,43 @@ app.post('/groupes', async (req, res) => {
         return res.json({ success: false, message: 'Erreur serveur.' });
     }
 });
+
+
+// Récupérer les membres d'un groupe
+app.get('/groupes/:id/membres', async (req, res) => {
+    try {
+        const [membres] = await db.execute(
+            `SELECT u.id, u.username FROM utilisateurs u
+             JOIN groupe_membres gm ON gm.user_id = u.id
+             WHERE gm.groupe_id = ?`, [req.params.id]
+        );
+        return res.json({ success: true, membres });
+    } catch (err) {
+        return res.json({ success: false });
+    }
+});
+
+// Ajouter un membre à un groupe
+app.post('/groupes/:id/membres', async (req, res) => {
+    if (!req.session.userId) return res.json({ success: false });
+    const { username } = req.body;
+    try {
+        const [user] = await db.execute("SELECT id FROM utilisateurs WHERE username = ?", [username]);
+        if (user.length === 0) return res.json({ success: false, message: "Utilisateur introuvable." });
+        await db.execute("INSERT IGNORE INTO groupe_membres (groupe_id, user_id) VALUES (?, ?)", [req.params.id, user[0].id]);
+        return res.json({ success: true });
+    } catch (err) {
+        return res.json({ success: false, message: "Erreur serveur." });
+    }
+});
+
+// Récupérer tous les utilisateurs (pour l'ajout)
+app.get('/utilisateurs', async (req, res) => {
+    if (!req.session.userId) return res.json({ success: false });
+    const [users] = await db.execute("SELECT id, username FROM utilisateurs WHERE email_verifie = 1");
+    return res.json({ success: true, utilisateurs: users });
+});
+
 
 // Récupérer les membres d'un groupe
 app.get('/groupes/:id/membres', async (req, res) => {

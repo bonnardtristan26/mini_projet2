@@ -246,6 +246,7 @@ function selectionnerServeur(serveurId) {
 function afficherSalons(salons, nomServeur) {
   // Masquer les MP
   mpList.style.display = "none";
+  document.getElementById('groupes-list').style.display = "none"; //masquer les groupes aussi
   
   // Afficher les salons
   channelsList.style.display = "flex";
@@ -758,7 +759,8 @@ async function login() {
     }
 }
 
-// ─── EASTER EGGMAN ─────────────────────────────────────────────────────────────────────
+// ─── EASTER EGGMAN ───
+if (logo && musique) {
 logo.addEventListener('click', () => {
   if (musique.paused) {
     // Si la musique est en pause, on la joue
@@ -768,9 +770,12 @@ logo.addEventListener('click', () => {
     // Si elle joue déjà, on la met en pause et on revient au début
     musique.pause();
     musique.currentTime = 0; 
-    logo.style.opacity = "1";
+logo.style.opacity = "1";
   }
 });
+}
+
+
 // ═════════════════════════════════════════════════════════════════════════════
 // GESTION DES GROUPES DE DISCUSSION
 // ═════════════════════════════════════════════════════════════════════════════
@@ -929,8 +934,7 @@ async function ajouterMembreGroupe() {
   } else {
     alert(data.message || 'Erreur');
   }
-
+}
 
 window.ajouterMembreGroupe = ajouterMembreGroupe;
 window.ouvrirGestionMembres = ouvrirGestionMembres;
-}
