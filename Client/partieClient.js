@@ -91,7 +91,7 @@ function afficherMessages(messages) {
     const user = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === msg.pseudo);
     let avatarSrc = user && user.avatar ? user.avatar : "/Ressource/Image/logo_LaDiscorde.png";
     // Format de l'heure
-    let heure = msg.heure ? msg.heure : "";
+    let heure = msg.timestamp || msg.heure || "";
     if (heure) {
       const date = new Date(heure);
       heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -100,7 +100,6 @@ function afficherMessages(messages) {
     const div = document.createElement("div");
     div.classList.add("message-row");
     div.classList.add(estMoi ? "moi" : "autre");
-
 
     if (estMoi) {
       div.innerHTML = `
@@ -505,7 +504,7 @@ socket.addEventListener("message", (event) => {
   const estMoi = data.pseudo === monPseudo;
   const user = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === data.pseudo);
   let avatarSrc = user && user.avatar ? user.avatar : "/Ressource/Image/logo_LaDiscorde.png";
-  let heure = data.heure ? data.heure : "";
+  let heure = data.timestamp || data.heure || "";
   if (heure) {
     const date = new Date(heure);
     heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -547,7 +546,8 @@ sendBtn.addEventListener("click", () => {
       userId: monUserId,
       texte: input.value.trim(),
       canal: canalActuel,
-      type: typeCanal
+      type: typeCanal,
+      timestamp: new Date().toISOString()
     };
     
     socket.send(JSON.stringify(message));
