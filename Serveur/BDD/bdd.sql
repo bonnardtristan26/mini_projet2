@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS `messages` (
   `canal` varchar(50) NOT NULL,
   `type` enum('public','private','group') NOT NULL DEFAULT 'public',
   `texte` text NOT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `idx_canal_type` (`canal`, `type`),
