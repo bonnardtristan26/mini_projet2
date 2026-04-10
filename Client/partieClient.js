@@ -9,20 +9,20 @@ if (estPageChat) {
 const socket = new WebSocket(`ws://${window.location.hostname}:3000`);
 
 const messagesDiv = document.getElementById("messages");
-const input = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
-const channelHeader = document.querySelector(".chat-header");
-const usersList = document.getElementById("users-list");
-const welcomeZone = document.getElementById("welcome-zone");
-const inputZone = document.getElementById("input-zone");
-const mpList = document.getElementById("mp-list");
-const serversIcons = document.getElementById("servers-icons");
-const channelsList = document.getElementById("channels-list");
-const sidebarHeader = document.getElementById("sidebar-header");
-const centerSidebar = document.getElementById("center-sidebar");
+const saisie = document.getElementById("messageInput");
+const envoiBtn = document.getElementById("sendBtn");
+const headerCanal = document.querySelector(".chat-header");
+const listeUtilisateurs = document.getElementById("users-list");
+const zoneAccueil = document.getElementById("welcome-zone");
+const saisieZone = document.getElementById("input-zone");
+const mpListe = document.getElementById("mp-list");
+const iconesServeurs = document.getElementById("servers-icons");
+const listeCanaux = document.getElementById("channels-list");
+const headerBarreLaterale = document.getElementById("sidebar-header");
+const centreBarreLaterale = document.getElementById("center-sidebar");
 
 let monPseudo = "";
-let monUserId = "";
+let monIDUtilisateur = "";
 let canalActuel = null;
 let typeCanal = null;
 let utilisateursEnLigne = new Map();
@@ -66,10 +66,22 @@ const serveurs = [
 // HISTORIQUE DES MESSAGES (Base de données)
 // ═════════════════════════════════════════════════════════════════════════════
 
-async function chargerHistorique(canal, type) {
+async function chargerHistorique(canal, type) { 
+  /*/
+  /////////////////////////
+  PARAMETRES DE LA FONCTION
+  /////////////////////////
+  
+  CANAL désigne les noms des canaux utilisés.
+  Un canal peut être un Message Privé, un Groupe ou un Canal de serveur Public
+
+  TYPE désigne le type de la discussion
+  Une discussion peut être Privée, Publique ou en Groupe
+  /*/
+
   try {
-    const response = await fetch(`/historique/${canal}/${type}`);
-    const data = await response.json();
+    const reponse = await fetch(`/historique/${canal}/${type}`);
+    const data = await reponse.json();
     
     if (data.success) {
       return data.messages;
@@ -84,12 +96,23 @@ async function chargerHistorique(canal, type) {
 }
 
 function afficherMessages(messages) {
+  /*/
+  /////////////////////////
+  PARAMETRES DE LA FONCTION
+  /////////////////////////
+
+  MESSAGES désigne les messages reçus
+  /*/
+
+  //Définir le div de messages comme vide
   messagesDiv.innerHTML = "";
   
   messages.forEach(msg => {
+    //Attribuer le message qui sera affiché au dessus de message envoyé par rapport à la personne ayant envoyé le message
     const estMoi = msg.pseudo === monPseudo;
-    const user = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === msg.pseudo);
-    let avatarSrc = user && user.avatar ? user.avatar : "/Ressource/Image/logo_LaDiscorde.png";
+    const utilisateur = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === msg.pseudo);
+    //Avatar de base défini comme le logo de La Discorde
+    let avatarSrc = utilisateur && utilisateur.avatar ? utilisateur.avatar : "/Ressource/Image/logo_LaDiscorde.png";
     // Format de l'heure
     let heure = msg.timestamp || msg.heure || "";
     if (heure) {
@@ -129,30 +152,30 @@ function afficherMessages(messages) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function afficherUtilisateurs() {
-  usersList.innerHTML = "";
-  utilisateursEnLigne.forEach((user, userId) => {
+  listeUtilisateurs.innerHTML = "";
+  utilisateursEnLigne.forEach((utilisateur, idUtilisateur) => {
     // Ne pas afficher soi-même
-    if (userId === monUserId) return;
+    if (idUtilisateur === monIDUtilisateur) return;
 
     // Avatar : utiliser l'URL reçue du serveur
-    let avatarSrc = user.avatar || "/Ressource/Image/logo_LaDiscorde.png";
+    let avatarSrc = utilisateur.avatar || "/Ressource/Image/logo_LaDiscorde.png";
 
-    const userItem = document.createElement("div");
-    userItem.classList.add("user-item");
-    userItem.id = `user-${userId}`;
-    userItem.innerHTML = `
+    const objetUtilisateur = document.createElement("div");
+    objetUtilisateur.classList.add("user-item");
+    objetUtilisateur.id = `utilisateur-${idUtilisateur}`;
+    objetUtilisateur.innerHTML = `
       <div class="user-avatar">
         <img src="${avatarSrc}" alt="avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
         <div class="online-badge"></div>
       </div>
-      <div class="user-name">${user.pseudo}</div>
+      <div class="user-name">${utilisateur.pseudo}</div>
     `;
 
-    userItem.addEventListener("click", () => {
-      ouvrirMessagePrive(user.pseudo, userId);
+    objetUtilisateur.addEventListener("click", () => {
+      ouvrirMessagePrive(utilisateur.pseudo, idUtilisateur);
     });
 
-    usersList.appendChild(userItem);
+    listeUtilisateurs.appendChild(objetUtilisateur);
   });
   // Mettre à jour le compteur
   document.getElementById("online-count").textContent = utilisateursEnLigne.size - 1;
@@ -160,14 +183,14 @@ function afficherUtilisateurs() {
 
 function afficherBienvenue() {
   messagesDiv.style.display = "none";
-  inputZone.style.display = "none";
-  welcomeZone.style.display = "flex";
+  saisieZone.style.display = "none";
+  zoneAccueil.style.display = "flex";
 }
 
 function afficherChat() {
   messagesDiv.style.display = "flex";
-  inputZone.style.display = "flex";
-  welcomeZone.style.display = "none";
+  saisieZone.style.display = "flex";
+  zoneAccueil.style.display = "none";
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -175,7 +198,7 @@ function afficherChat() {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function afficherServeurs() {
-  serversIcons.innerHTML = "";
+  iconesServeurs.innerHTML = "";
   
   // Bouton pour retourner aux MP
   const mpButton = document.createElement("div");
@@ -191,14 +214,14 @@ function afficherServeurs() {
     afficherMessagePrives();
   });
   
-  serversIcons.appendChild(mpButton);
+  iconesServeurs.appendChild(mpButton);
   
   // Ajouter une ligne de séparation
   const separator = document.createElement("div");
   separator.style.height = "1px";
   separator.style.background = "rgba(200,0,0,0.2)";
   separator.style.margin = "10px 0";
-  serversIcons.appendChild(separator);
+  iconesServeurs.appendChild(separator);
   
   serveurs.forEach(serveur => {
     const serverIcon = document.createElement("div");
@@ -222,7 +245,7 @@ function afficherServeurs() {
       selectionnerServeur(serveur.id);
     });
     
-    serversIcons.appendChild(serverIcon);
+    iconesServeurs.appendChild(serverIcon);
   });
 }
 
@@ -244,12 +267,12 @@ function selectionnerServeur(serveurId) {
 
 function afficherSalons(salons, nomServeur) {
   // Masquer les MP
-  mpList.style.display = "none";
+  mpListe.style.display = "none";
   document.getElementById('groupes-list').style.display = "none"; //masquer les groupes aussi
   
   // Afficher les salons
-  channelsList.style.display = "flex";
-  channelsList.innerHTML = "";
+  listeCanaux.style.display = "flex";
+  listeCanaux.innerHTML = "";
   
   // Mettre à jour le titre sans écraser le bouton +
   document.getElementById('sidebar-header-title').textContent = nomServeur;
@@ -265,16 +288,16 @@ function afficherSalons(salons, nomServeur) {
       selectionnerSalon(salon, serveurActuel);
     });
     
-    channelsList.appendChild(salonItem);
+    listeCanaux.appendChild(salonItem);
   });
 }
 
 function afficherMessagePrives() {
   serveurActuel = null;
-  channelsList.style.display = "none";
+  listeCanaux.style.display = "none";
   
   // Afficher les listes de MP et de Groupes
-  mpList.style.display = "flex";
+  mpListe.style.display = "flex";
   const groupesList = document.getElementById('groupes-list');
   if (groupesList) {
     groupesList.style.display = "flex";
@@ -333,21 +356,21 @@ function selectionnerSalon(salon, serveurId) {
 // OUVERTURE D'UN MESSAGE PRIVÉ
 // ═════════════════════════════════════════════════════════════════════════════
 
-function ouvrirMessagePrive(pseudo, userId) {
+function ouvrirMessagePrive(pseudo, idUtilisateur) {
   // Vérifier si le MP existe déjà
-  const canalMP = `MP_${Math.min(monUserId, userId)}_${Math.max(monUserId, userId)}`;
+  const canalMP = `MP_${Math.min(monIDUtilisateur, idUtilisateur)}_${Math.max(monIDUtilisateur, idUtilisateur)}`;
   
   // Vérifier si un item avec ce pseudo existe déjà
-  const existant = mpList.querySelector(`[data-mp-user-id="${userId}"]`);
+  const existant = mpListe.querySelector(`[data-mp-user-id="${idUtilisateur}"]`);
   
   if (!existant) {
     const mpItem = document.createElement("div");
     mpItem.classList.add("channel-item");
     mpItem.setAttribute("data-channel", canalMP);
     mpItem.setAttribute("data-type", "private");
-    mpItem.setAttribute("data-mp-user-id", userId);
+    mpItem.setAttribute("data-mp-user-id", idUtilisateur);
     mpItem.innerHTML = `<img src="/Ressource/Image/logo_LaDiscorde.png" alt="MP" class="mp-logo"> ${pseudo}`;
-    mpList.appendChild(mpItem);
+    mpListe.appendChild(mpItem);
 
     mpItem.addEventListener("click", () => {
       changerCanal(canalMP, "private");
@@ -373,16 +396,16 @@ async function changerCanal(canal, type, titrePersonnalise = null) {
     if (parts.length === 3) {
       const id1 = parseInt(parts[1]);
       const id2 = parseInt(parts[2]);
-      const otherUserId = id1 === monUserId ? id2 : id1;
-      const user = utilisateursEnLigne.get(otherUserId);
-      if (user) titre = user.pseudo;
+      const autreIdUtilisateur = id1 === monIDUtilisateur ? id2 : id1;
+      const utilisateur = utilisateursEnLigne.get(autreIdUtilisateur);
+      if (utilisateur) titre = utilisateur.pseudo;
     }
   }
   
-  channelHeader.innerHTML = `<span>${symbole}</span> ${titre}`;
+  headerCanal.innerHTML = `<span>${symbole}</span> ${titre}`;
   
   // Changement placeholder
-  input.placeholder = type === 'private' 
+  saisie.placeholder = type === 'private' 
     ? `Envoie un message privé à ${titre}...` 
     : `Écris un message dans ${titrePersonnalise || '#' + canal}...`;
   
@@ -413,8 +436,8 @@ async function changerCanal(canal, type, titrePersonnalise = null) {
       if (parts.length === 3) {
         const id1 = parseInt(parts[1]);
         const id2 = parseInt(parts[2]);
-        const otherUserId = id1 === monUserId ? id2 : id1;
-        if (item.id === `user-${otherUserId}`) {
+        const autreIdUtilisateur = id1 === monIDUtilisateur ? id2 : id1;
+        if (item.id === `utilisateur-${autreIdUtilisateur}`) {
           item.classList.add("active");
         }
       }
@@ -444,15 +467,15 @@ fetch('/verifier-session')
   .then(r => r.json())
   .then(data => { 
     if (data.connecte) {
-      monPseudo = data.username;
-      monUserId = data.userId;
+      monPseudo = data.nomUtilisateur;
+      monIDUtilisateur = data.idUtilisateur;
       sessionLoaded = true;
       
       // Envoyer les infos au serveur si la connection WebSocket est déjà établie
       if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
+        socket.envoi(JSON.stringify({
           type: "user_connect",
-          userId: monUserId,
+          idUtilisateur: monIDUtilisateur,
           pseudo: monPseudo
         }));
       }
@@ -464,9 +487,9 @@ socket.addEventListener("open", () => {
   
   // Envoyer les infos de l'utilisateur au serveur
   if (sessionLoaded) {
-    socket.send(JSON.stringify({
+    socket.envoi(JSON.stringify({
       type: "user_connect",
-      userId: monUserId,
+      idUtilisateur: monIDUtilisateur,
       pseudo: monPseudo
     }));
   }
@@ -489,8 +512,8 @@ socket.addEventListener("message", (event) => {
   // Si c'est une mise à jour des utilisateurs en ligne
   if (data.type === "online_users") {
     utilisateursEnLigne = new Map();
-    data.users.forEach(user => {
-      utilisateursEnLigne.set(user.userId, { pseudo: user.pseudo, avatar: user.avatar });
+    data.users.forEach(utilisateur => {
+      utilisateursEnLigne.set(utilisateur.idUtilisateur, { pseudo: utilisateur.pseudo, avatar: utilisateur.avatar });
     });
     afficherUtilisateurs();
     return;
@@ -502,9 +525,15 @@ socket.addEventListener("message", (event) => {
   }
 
   const estMoi = data.pseudo === monPseudo;
+<<<<<<< HEAD
+  const utilisateur = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === data.pseudo);
+  let avatarSrc = utilisateur && utilisateur.avatar ? utilisateur.avatar : "/Ressource/Image/logo_LaDiscorde.png";
+  let heure = data.heure ? data.heure : "";
+=======
   const user = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === data.pseudo);
   let avatarSrc = user && user.avatar ? user.avatar : "/Ressource/Image/logo_LaDiscorde.png";
   let heure = data.timestamp || data.heure || "";
+>>>>>>> 560bcde8c71d706f2fde56c9a99676a92e04be11
   if (heure) {
     const date = new Date(heure);
     heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -540,22 +569,22 @@ socket.addEventListener("message", (event) => {
 // ═════════════════════════════════════════════════════════════════════════════
 
 sendBtn.addEventListener("click", () => {
-  if (input.value.trim() !== "") {
+  if (saisie.value.trim() !== "") {
     const message = {
       pseudo: monPseudo,
-      userId: monUserId,
-      texte: input.value.trim(),
+      idUtilisateur: monIDUtilisateur,
+      texte: saisie.value.trim(),
       canal: canalActuel,
       type: typeCanal,
       timestamp: new Date().toISOString()
     };
     
-    socket.send(JSON.stringify(message));
-    input.value = "";
+    socket.envoi(JSON.stringify(message));
+    saisie.value = "";
   }
 });
 
-input.addEventListener("keypress", (e) => {
+saisie.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendBtn.click();
 });
 
@@ -564,8 +593,8 @@ afficherBienvenue();
 afficherServeurs();
 afficherMessagePrives();
 
-// Initialiser l'état du channelsList
-channelsList.style.display = "none";
+// Initialiser l'état du listeCanaux
+listeCanaux.style.display = "none";
 
 // PARAMÈTRES PROFIL (modal)
 const btnSettings = document.getElementById("btn-settings");
@@ -575,25 +604,25 @@ const avatarChoices = document.querySelectorAll(".avatar-choice");
 const avatarDiv = document.querySelector(".sidebar-footer .avatar");
 const avatarUpload = document.getElementById("avatar-upload");
 const importedAvatarPreview = document.getElementById("imported-avatar-preview");
-const userDescription = document.getElementById("user-description");
+const descriptionUtilisateur = document.getElementById("user-description");
 
 btnSettings.addEventListener("click", () => {
   modalSettings.style.display = "flex";
   // Charger description si déjà enregistrée
-  userDescription.value = localStorage.getItem("userDescription") || "";
+  descriptionUtilisateur.value = localStorage.getItem("userDescription") || "";
 });
 closeSettings.addEventListener("click", () => {
   modalSettings.style.display = "none";
-  localStorage.setItem("userDescription", userDescription.value);
+  localStorage.setItem("userDescription", descriptionUtilisateur.value);
 });
 window.addEventListener("click", (e) => {
   if (e.target === modalSettings) {
     modalSettings.style.display = "none";
-    localStorage.setItem("userDescription", userDescription.value);
+    localStorage.setItem("userDescription", descriptionUtilisateur.value);
   }
 });
-userDescription.addEventListener("input", () => {
-  localStorage.setItem("userDescription", userDescription.value);
+descriptionUtilisateur.addEventListener("saisie", () => {
+  localStorage.setItem("userDescription", descriptionUtilisateur.value);
 });
 avatarChoices.forEach(img => {
   img.addEventListener("click", async () => {
@@ -604,7 +633,7 @@ avatarChoices.forEach(img => {
       const res = await fetch("/upload-avatar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: monUserId, baseAvatar: img.dataset.avatar })
+        body: JSON.stringify({ idUtilisateur: monIDUtilisateur, baseAvatar: img.dataset.avatar })
       });
       const data = await res.json();
       if (data.success && data.url) {
@@ -634,7 +663,7 @@ avatarUpload.addEventListener("change", async (e) => {
       const res = await fetch("/upload-avatar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: monUserId, imageBase64: ev.target.result })
+        body: JSON.stringify({ idUtilisateur: monIDUtilisateur, imageBase64: ev.target.result })
       });
       const data = await res.json();
       if (data.success && data.url) {
@@ -658,7 +687,7 @@ window.addEventListener("DOMContentLoaded", () => {
     avatarDiv.innerHTML = `<img src='${savedAvatar}' alt='Avatar' style='width:32px;height:32px;border-radius:50%;object-fit:cover;'>`;
   }
   const savedDesc = localStorage.getItem("userDescription");
-  if (savedDesc) userDescription.value = savedDesc;
+  if (savedDesc) descriptionUtilisateur.value = savedDesc;
 });
 
 } //fin du if(estPageChat)
@@ -690,11 +719,11 @@ async function sha256(message) {
 
 // ─── INSCRIPTION ───────────────────────────────────────────────────────────────────
 async function senduser() {
-    const username = document.getElementById('username').value.trim();
+    const nomUtilisateur = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
     const email    = document.getElementById('email').value.trim();
 
-    if (!username || !password) {
+    if (!nomUtilisateur || !password) {
         alert("Remplis tous les champs !");
         return;
     }
@@ -704,13 +733,13 @@ async function senduser() {
 
     // 2. On envoie au serveur PHP (le mdp en clair ne circule jamais)
     try {
-        const response = await fetch('/inscription', {
+        const reponse = await fetch('/inscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password: hashedPassword, email })
+            body: JSON.stringify({ nomUtilisateur, password: hashedPassword, email })
         });
 
-        const data = await response.json();
+        const data = await reponse.json();
 
         if (data.success) {
             alert("Compte créé ! Tu peux te connecter.");
@@ -726,10 +755,10 @@ async function senduser() {
 
 // ─── CONNEXION ─────────────────────────────────────────────────────────────────────
 async function login() {
-    const username = document.getElementById('username').value.trim();
+    const nomUtilisateur = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
 
-    if (!username || !password) {
+    if (!nomUtilisateur || !password) {
         alert("Remplis tous les champs !");
         return;
     }
@@ -739,16 +768,16 @@ async function login() {
 
     // 2. Envoi au serveur
     try {
-        const response = await fetch('/connexion', {
+        const reponse = await fetch('/connexion', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password: hashedPassword}) 
+            body: JSON.stringify({ nomUtilisateur, password: hashedPassword}) 
         });
 
-        const data = await response.json();
+        const data = await reponse.json();
 
         if (data.success) {
-            alert("Connecté ! Bienvenue " + data.username);
+            alert("Connecté ! Bienvenue " + data.nomUtilisateur);
             window.location.href = "chat_general.html";
         } else {
             alert("Erreur : " + data.message);
@@ -912,7 +941,7 @@ async function chargerMembres(groupeId) {
     data.membres.forEach(m => {
       const div = document.createElement('div');
       div.style.cssText = 'padding:6px 0; color:#ccc; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.05);';
-      div.textContent = '👤 ' + m.username;
+      div.textContent = '👤 ' + m.nomUtilisateur;
       liste.appendChild(div);
     });
   }
@@ -920,12 +949,12 @@ async function chargerMembres(groupeId) {
 
 async function ajouterMembreGroupe() {
   const groupeId = document.getElementById('modal-membres').dataset.groupeId;
-  const username = document.getElementById('input-ajout-membre').value.trim();
-  if (!username) return;
+  const nomUtilisateur = document.getElementById('input-ajout-membre').value.trim();
+  if (!nomUtilisateur) return;
   const res = await fetch(`/groupes/${groupeId}/membres`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username })
+    body: JSON.stringify({ nomUtilisateur })
   });
   const data = await res.json();
   if (data.success) {
