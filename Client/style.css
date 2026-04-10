@@ -906,6 +906,7 @@ body.chat-body {
 }
 #sendBtn:hover { background: #e0001a; }
 #sendBtn:active { transform: scale(0.97); }
+
  
 /* ── BARRE DU BAS ── */
 .bottombar {
