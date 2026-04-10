@@ -1,15 +1,21 @@
-## 1. Création du squelette du code et de l'IHM 
-Structure HTML5 complète : topbar, sidebar avec canaux, zone chat, messages, input
-Layout full-screen responsif avec flexbox
+## 1. Mise en place de l'interface
+On a créé une page de chat complète : barre du haut, menu à gauche, zone de messages et zone de saisie.
+Le layout prend tout l'écran et s'adapte aux différentes tailles grâce au flexbox.
 
-## 2. Renvoie automatique à la page de connexion si non connecté 
-Vérification de session via fetch('/verifier-session')
-Redirection automatique vers login.html si !connecte
-Affichage du pseudo utilisateur si connecté
+## 2. Vérification de connexion automatique
+La page vérifie si on est connecté via `/verifier-session`.
+Si on n'est pas connecté, on est redirigé vers `login.html`.
+Si on est connecté, le pseudo s'affiche.
 
-## 3. Refonte du design complet 
-Thème dark Discord-like : fond noir #111214, accent rouge #c0000e
-Sidebar, serveurs, messages avec couleurs distinctes (reçu/envoyé)
-Animations smooth (fadeIn, slideDown, pulse)
-Formulaires centrés avec inputs et boutons stylisés
-Media queries pour responsive design
+## 3. Refonte visuelle
+Le design est inspiré de Discord : fond sombre et accents rouges.
+On a des blocs de discussion, des serveurs et des messages bien différenciés pour voir qui parle.
+Des petites animations rendent l'interface plus fluide.
+Les formulaires sont propres et le site fonctionne bien sur mobile.
+
+## 4. Création et gestion de groupes de discussion
+On peut créer un groupe depuis une fenêtre pop-up, choisir son nom et valider.
+Le groupe apparaît ensuite dans la liste et l'interface se met à jour.
+On peut aussi ouvrir une autre fenêtre pour voir les membres du groupe.
+Dans cette fenêtre, on peut ajouter un membre en tapant son pseudo.
+Tout se passe en direct avec des appels au serveur pour charger les groupes et les membres.
