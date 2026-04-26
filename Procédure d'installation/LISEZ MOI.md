@@ -84,9 +84,9 @@
 
 
 
-&#x20;   Dans **Vos Alias**, cliquez sur **PhpMyAdmin (version de phpMyAdmin),** entrez le nom d'utilisateur **root** et le mot de passe **root**
+&#x20;   Dans **Vos Alias**, cliquez sur **PhpMyAdmin (version de phpMyAdmin),** entrez le nom d'utilisateur **root** et ne mettez pas de mot de passe
 
-&#x20;   puis changez le chois du serveur de MySQL à **MariaDB.**
+&#x20;   puis changez le choix du serveur de **MySQL** à **MariaDB.**
 
 &#x20;   Ensuite dans votre repository **GitHub,** récupérez le fichier **bdd.sql** dans le fichier **Serveur/BDD/**, puis allez dans
 
@@ -112,7 +112,7 @@
 
 &#x09;
 
-&#x20;**6.** Il vous faudra aussi vous créer un compte **Brevo** afin de changer la **clé API** dans le code aux **lignes 70** et **72** du fichier **serveur.js**
+&#x20;**6.** Il vous faudra aussi vous créer un compte **Brevo** afin de changer la **clé API** dans le code à la ligne **ligne 73** du fichier **serveur.js**
 
 &#x20;   Voici le lien pour le compte **Brevo** :
 
