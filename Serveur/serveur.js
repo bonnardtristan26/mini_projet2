@@ -290,7 +290,7 @@ const brevoResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
         "Content-Type": "application/json",
-        "api-key": "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"
+        "api-key": "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"
     },
     body: JSON.stringify({
         sender: { name: "LaDiscorde", email: "ztoxyu@gmail.com" },
