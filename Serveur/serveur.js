@@ -11,7 +11,7 @@
 // ══════════════════════════════════════════════════════════════════════════════════
 
 import express from "express";
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 import http from "http";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -20,6 +20,7 @@ import bcrypt from "bcrypt";
 import mysql from "mysql2/promise";
 import session from "express-session";
 import nodemailer from "nodemailer";
+import fs from "fs";
 
 // ══════════════════════════════════════════════════════════════════════════════════
 // CONFIGURATION DE BASE
@@ -63,11 +64,13 @@ console.log("Connecté à MariaDB");
 // ── Config Gmail Brevo 
 const transporter = nodemailer.createTransport({
     host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false,
+    port: 465,
+    secure: true,
     auth: {
-        user: "a658f1001@smtp-brevo.com",
-        pass: "xsmtpsib-df59dfe619649d0cc7f1ab0329ea9570e3ba19cc41245f64c50836e10d2e8d9f-gyJ18H9j8RABZsc7"
+        //Mettez ici  votre compte Brevo.
+        user: "a6844a001@smtp-brevo.com",
+        //Puis mettez ici la clef API que vou savez généré.
+        pass: "xsmtpsib-7f7c0e038841866d3e7cf58567edc2b9bec46b3870d19c9245b8f9bc1a1742d6-YINoaJlLazUQpW9e"
     }
 });
 
@@ -80,8 +83,45 @@ const wss = new WebSocketServer({ server });
 // Map pour tracker les clients connectés avec leur session
 const clientSessions = new Map();
 
+// Map pour tracker les utilisateurs en ligne (userId => { pseudo, ws })
+const utilisateursEnLigne = new Map();
+
+// Fonction pour diffuser la liste des utilisateurs en ligne à tous les clients
+function getAvatarUrl(userId) {
+  const base = path.join(__dirname, `../Ressource/Image/imageprofil/`);
+  const exts = ["png", "jpg", "jpeg"];
+  for (const ext of exts) {
+    const file = path.join(base, `${userId}.${ext}`);
+    if (fs.existsSync(file)) {
+      return `/Ressource/Image/imageprofil/${userId}.${ext}`;
+    }
+  }
+  return "/Ressource/Image/logo_LaDiscorde.png";
+}
+
+function diffuserUtilisateurs() {
+  const users = Array.from(utilisateursEnLigne.values()).map(user => ({
+    userId: user.userId,
+    pseudo: user.pseudo,
+    avatar: getAvatarUrl(user.userId)
+  }));
+  const message = JSON.stringify({
+    type: "online_users",
+    users: users
+  });
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(message);
+    }
+  });
+}
+
 wss.on("connection", (ws) => {
   console.log("Client connecté");
+  
+  let userConnected = false;
+  let userId = null;
+  let pseudo = null;
   
   // Récupérer les infos de session du client (envoyées à la connexion)
   ws.on("message", async (message) => {
@@ -89,6 +129,26 @@ wss.on("connection", (ws) => {
     
     try {
       const data = JSON.parse(message.toString());
+      
+      // Message de connexion utilisateur
+      if (data.type === "user_connect" && data.userId && data.pseudo) {
+        userId = data.userId;
+        pseudo = data.pseudo;
+        userConnected = true;
+        
+        // Ajouter l'utilisateur à la liste des en ligne
+        utilisateursEnLigne.set(userId, {
+          userId: userId,
+          pseudo: pseudo,
+          ws: ws
+        });
+        
+        console.log(`${pseudo} (ID: ${userId}) connecté`);
+        
+        // Diffuser la liste mise à jour à tous les clients
+        diffuserUtilisateurs();
+        return;
+      }
       
       // Si c'est un message avec canal et type
       if (data.pseudo && data.texte && data.canal && data.type && data.userId) {
@@ -100,7 +160,7 @@ wss.on("connection", (ws) => {
         
         // Diffuser à tous les clients
         wss.clients.forEach((client) => {
-          if (client.readyState === ws.OPEN) {
+          if (client.readyState === WebSocket.OPEN) {
             client.send(message.toString());
           }
         });
@@ -109,10 +169,21 @@ wss.on("connection", (ws) => {
       console.error("Erreur traitement message :", err);
       // Diffuser quand même si c'est un message simple
       wss.clients.forEach((client) => {
-        if (client.readyState === ws.OPEN) {
+        if (client.readyState === WebSocket.OPEN) {
           client.send(message.toString());
         }
       });
+    }
+  });
+  
+  // Gestion de la déconnexion
+  ws.on("close", () => {
+    if (userConnected && userId) {
+      utilisateursEnLigne.delete(userId);
+      console.log(`${pseudo} (ID: ${userId}) déconnecté`);
+      
+      // Diffuser la liste mise à jour à tous les clients
+      diffuserUtilisateurs();
     }
   });
 });
@@ -215,12 +286,22 @@ app.post("/inscription", async (req, res) => {
         </html>`;
 
 //en voie mail
-await transporter.sendMail({
-    from: '"LaDiscorde" <ztoxyu@gmail.com>',
-    to: email,
-    subject: "Vérifie ton adresse email — LaDiscorde",
-    html: htmlMail
+const brevoResponse = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "api-key": "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"
+    },
+    body: JSON.stringify({
+        sender: { name: "LaDiscorde", email: "ztoxyu@gmail.com" },
+        to: [{ email: email, name: username }],
+        subject: "Vérifie ton adresse email — LaDiscorde",
+        htmlContent: htmlMail
+    })
 });
+
+const brevoResult = await brevoResponse.json();
+console.log("Réponse Brevo :", JSON.stringify(brevoResult));
 
         console.log(`Mail de vérification envoyé à : ${email} (user: ${username})`);
         return res.json({ success: true, message: "Compte créé ! Vérifie tes emails." });
@@ -317,7 +398,7 @@ app.get("/historique/:canal/:type", async (req, res) => {
     const { canal, type } = req.params;
     
     // Vérifications
-    if (!['public', 'private'].includes(type)) {
+    if (!['public', 'private', 'group'].includes(type)) {
         return res.json({ success: false, message: "Type invalide." });
     }
     
@@ -341,6 +422,118 @@ app.get("/historique/:canal/:type", async (req, res) => {
     }
 });
 
+// Routes gestion des groupes
+app.get('/groupes', async (req, res) => {
+    try {
+        const [groupes] = await db.execute("SELECT id, nom, createur_id FROM groupes ORDER BY created_at DESC");
+        return res.json({ success: true, groupes });
+    } catch (err) {
+        console.error('Erreur récupération groupes :', err);
+        return res.json({ success: false, message: 'Erreur serveur.' });
+    }
+});
+
+app.post('/groupes', async (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ success: false, message: 'Non connecté.' });
+    }
+
+    const { nom } = req.body;
+    if (!nom || typeof nom !== 'string' || !nom.trim()) {
+        return res.status(400).json({ success: false, message: 'Nom de groupe invalide.' });
+    }
+
+    try {
+        const [result] = await db.execute(
+            "INSERT INTO groupes (nom, createur_id) VALUES (?, ?)",
+            [nom.trim(), req.session.userId]
+        );
+
+        // Ajouter le créateur en tant que membre du groupe
+        await db.execute(
+            "INSERT INTO groupe_membres (groupe_id, user_id) VALUES (?, ?)",
+            [result.insertId, req.session.userId]
+        );
+
+        return res.json({ success: true, groupe: { id: result.insertId, nom: nom.trim(), createur_id: req.session.userId } });
+    } catch (err) {
+        console.error('Erreur création groupe :', err);
+        return res.json({ success: false, message: 'Erreur serveur.' });
+    }
+});
+
+
+// Récupérer les membres d'un groupe
+app.get('/groupes/:id/membres', async (req, res) => {
+    try {
+        const [membres] = await db.execute(
+            `SELECT u.id, u.username FROM utilisateurs u
+             JOIN groupe_membres gm ON gm.user_id = u.id
+             WHERE gm.groupe_id = ?`, [req.params.id]
+        );
+        return res.json({ success: true, membres });
+    } catch (err) {
+        return res.json({ success: false });
+    }
+});
+
+// Ajouter un membre à un groupe
+app.post('/groupes/:id/membres', async (req, res) => {
+    if (!req.session.userId) return res.json({ success: false });
+    const { username } = req.body;
+    try {
+        const [user] = await db.execute("SELECT id FROM utilisateurs WHERE username = ?", [username]);
+        if (user.length === 0) return res.json({ success: false, message: "Utilisateur introuvable." });
+        await db.execute("INSERT IGNORE INTO groupe_membres (groupe_id, user_id) VALUES (?, ?)", [req.params.id, user[0].id]);
+        return res.json({ success: true });
+    } catch (err) {
+        return res.json({ success: false, message: "Erreur serveur." });
+    }
+});
+
+// Récupérer tous les utilisateurs (pour l'ajout)
+app.get('/utilisateurs', async (req, res) => {
+    if (!req.session.userId) return res.json({ success: false });
+    const [users] = await db.execute("SELECT id, username FROM utilisateurs WHERE email_verifie = 1");
+    return res.json({ success: true, utilisateurs: users });
+});
+
+
+// Récupérer les membres d'un groupe
+app.get('/groupes/:id/membres', async (req, res) => {
+    try {
+        const [membres] = await db.execute(
+            `SELECT u.id, u.username FROM utilisateurs u
+             JOIN groupe_membres gm ON gm.user_id = u.id
+             WHERE gm.groupe_id = ?`, [req.params.id]
+        );
+        return res.json({ success: true, membres });
+    } catch (err) {
+        return res.json({ success: false });
+    }
+});
+
+// Ajouter un membre à un groupe
+app.post('/groupes/:id/membres', async (req, res) => {
+    if (!req.session.userId) return res.json({ success: false });
+    const { username } = req.body;
+    try {
+        const [user] = await db.execute("SELECT id FROM utilisateurs WHERE username = ?", [username]);
+        if (user.length === 0) return res.json({ success: false, message: "Utilisateur introuvable." });
+        await db.execute("INSERT IGNORE INTO groupe_membres (groupe_id, user_id) VALUES (?, ?)", [req.params.id, user[0].id]);
+        return res.json({ success: true });
+    } catch (err) {
+        return res.json({ success: false, message: "Erreur serveur." });
+    }
+});
+
+// Récupérer tous les utilisateurs (pour l'ajout)
+app.get('/utilisateurs', async (req, res) => {
+    if (!req.session.userId) return res.json({ success: false });
+    const [users] = await db.execute("SELECT id, username FROM utilisateurs WHERE email_verifie = 1");
+    return res.json({ success: true, utilisateurs: users });
+});
+
 // Route pour sauvegarder un message (fallback en cas de problème WebSocket)
 app.post("/sauvegarder-message", async (req, res) => {
     if (!req.session.userId) return res.json({ success: false, message: "Non connecté." });
@@ -351,7 +544,7 @@ app.post("/sauvegarder-message", async (req, res) => {
         return res.json({ success: false, message: "Données manquantes." });
     }
     
-    if (!['public', 'private'].includes(type)) {
+    if (!['public', 'private', 'group'].includes(type)) {
         return res.json({ success: false, message: "Type invalide." });
     }
     
@@ -365,6 +558,37 @@ app.post("/sauvegarder-message", async (req, res) => {
     } catch (err) {
         console.error("Erreur sauvegarde message :", err);
         return res.json({ success: false, message: "Erreur serveur." });
+    }
+});
+
+// Route pour upload d'avatar (POST /upload-avatar)
+app.post("/upload-avatar", async (req, res) => {
+    try {
+        const { userId, imageBase64, baseAvatar } = req.body;
+        if (!userId) return res.status(400).json({ success: false, message: "Données manquantes" });
+        // Si baseAvatar est fourni, copier l'image de base
+        if (baseAvatar) {
+            const ext = baseAvatar.split('.').pop();
+            const dest = path.join(__dirname, `../Ressource/Image/imageprofil/${userId}.${ext}`);
+            const src = path.join(__dirname, `..${baseAvatar}`);
+            if (!fs.existsSync(src)) return res.status(400).json({ success: false, message: "Fichier source introuvable" });
+            fs.copyFileSync(src, dest);
+            diffuserUtilisateurs();
+            return res.json({ success: true, url: `/Ressource/Image/imageprofil/${userId}.${ext}` });
+        }
+        // Sinon, imageBase64 (upload personnalisé)
+        if (!imageBase64) return res.status(400).json({ success: false, message: "Aucune image fournie" });
+        const matches = imageBase64.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/);
+        if (!matches) return res.status(400).json({ success: false, message: "Format image invalide" });
+        const ext = matches[1] === "jpeg" ? "jpg" : matches[1];
+        const buffer = Buffer.from(matches[2], "base64");
+        const filePath = path.join(__dirname, `../Ressource/Image/imageprofil/${userId}.${ext}`);
+        fs.writeFileSync(filePath, buffer);
+        diffuserUtilisateurs();
+        return res.json({ success: true, url: `/Ressource/Image/imageprofil/${userId}.${ext}` });
+    } catch (err) {
+        console.error("Erreur upload avatar:", err);
+        return res.status(500).json({ success: false, message: "Erreur serveur" });
     }
 });
 

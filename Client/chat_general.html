@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Chat WebSocket</title>
+  <title>LaDiscorde</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -10,50 +10,96 @@
   <!-- BARRE DU HAUT -->
   <header class="topbar">
     <p class="app-title">LaDiscorde</p>
-    <img src="/Ressource/Image/logo_LaDiscorde.png" alt="Logo LaDiscorde">
+    <img id="logo_la_discorde" src="/Ressource/Image/logo_LaDiscorde.png" style="cursor: pointer;" alt="LaDiscorde">
+    <audio id="musique-easter-egg" src="../Ressource/Audio/Playlist/OneHourofSovietMusic.mp3"></audio>
   </header>
 
   <div class="layout">
 
-    <!-- COLONNE SERVEURS -->
-    <nav class="servers">
-      <div class="server-icon active" title="Chat général">
-        <img src="/Ressource/Image/logo_LaDiscorde.png" alt="LaDiscorde">
+    <!-- COLONNE SERVEURS (À GAUCHE) -->
+    <aside class="servers-sidebar">
+      <div class="servers-icons" id="servers-icons">
+        <!-- Serveurs seront ajoutés ici en JS -->
       </div>
-      <div class="server-icon" title="Serveur 2">🎮</div>
-      <div class="server-icon" title="Serveur 3">🔥</div>
-      <div class="server-icon" title="Ajouter" style="font-size:20px;color:rgba(200,0,0,0.5);">+</div>
-    </nav>
+    </aside>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sidebar-header">Canaux</div>
+    <!-- COLONNE CENTRALE (MP OU SALONS) -->
+    <aside class="sidebar" id="center-sidebar">
+      <div class="sidebar-header" id="sidebar-header">
+        <span id="sidebar-header-title">Messages privés</span>
+        <!-- BOUTON GROUPE : ouvre la modale de création -->
+        <button
+          id="btn-creer-groupe"
+          title="Créer un groupe"
+          onclick="ouvrirModalGroupe()"
+          style="margin-left:auto; background:#c0000e; color:white; border:none; border-radius:50%; width:28px; height:28px; font-size:20px; line-height:1; cursor:pointer; flex-shrink:0;">
+          +
+        </button>
+      </div>
       <div class="sidebar-list">
-        <div class="channel-item active" data-channel="général" data-type="public">💬 général</div>
-        <div class="channel-item" data-channel="annonces" data-type="public">📢 annonces</div>
-        <div class="channel-item" data-channel="gaming" data-type="public">🎮 gaming</div>
-        <div class="sidebar-header" style="margin-top:10px;">Messages privés</div>
-        <div class="channel-item" data-channel="MP_1" data-type="private">👤 MP 1</div>
-        <div class="channel-item" data-channel="MP_2" data-type="private">👤 MP 2</div>
+        <div id="mp-list" style="display: flex; flex-direction: column;"></div>
+  
+        <div id="groupes-header" style="padding: 10px; color: #888; font-size: 12px; font-weight: bold; text-transform: uppercase; display: none;">
+          Groupes
+        </div>
+        
+        <div id="groupes-list" style="display: none; flex-direction: column;"></div>
+        <div id="channels-list" style="display: none; flex-direction: column;"></div>
       </div>
       <div class="sidebar-footer">
         <div class="avatar"></div>
         <span class="pseudo" id="pseudo-connecte">...</span>
         <button class="btn-deco" onclick="deconnecter()" title="Se déconnecter">❌</button>
       </div>
+
+      <!-- MODAL PARAMÈTRES PROFIL -->
+      <div id="modal-settings" class="modal-settings" style="display:none;">
+        <div class="modal-content modal-flex">
+          <span class="close-modal" id="close-settings">&times;</span>
+          <div class="settings-left">
+            <h2>Description</h2>
+            <textarea id="user-description" placeholder="Écris une petite description..." maxlength="200"></textarea>
+          </div>
+          <div class="settings-right">
+            <h2>Photo de profil</h2>
+            <div class="avatars-list">
+              <img src="/Ressource/Image/imageprofil/pfp.jpg" class="avatar-choice selected" data-avatar="/Ressource/Image/imageprofil/pfp.jpg" alt="Avatar 1">
+              <img src="/Ressource/Image/imageprofil/pfp2.jpg" class="avatar-choice" data-avatar="/Ressource/Image/imageprofil/pfp2.jpg" alt="Avatar 2">
+              <img src="/Ressource/Image/imageprofil/pfp4.jpeg" class="avatar-choice" data-avatar="/Ressource/Image/imageprofil/pfp4.jpeg" alt="Avatar 3">
+              <img id="imported-avatar-preview" style="display:none;" class="avatar-choice" alt="Avatar importé">
+            </div>
+            <input type="file" id="avatar-upload" accept="image/*" style="margin-top:12px;">
+            <label for="avatar-upload" class="import-btn">Importer une image</label>
+          </div>
+        </div>
+      </div>
     </aside>
 
-    <!-- ZONE CHAT -->
+    <!-- ZONE CHAT PRINCIPALE -->
     <main class="chat-zone">
       <div class="chat-header">
-        <span>#</span> général
+        <span>👤</span> Messages privés
       </div>
-      <div id="messages"></div>
-      <div id="input-zone">
-        <input type="text" id="messageInput" placeholder="Écris un message dans #général...">
+      <div id="messages" style="display:none;"></div>
+      <div id="welcome-zone" class="welcome-container">
+        <img src="/Ressource/Image/logo_LaDiscorde.png" alt="LaDiscorde" class="welcome-logo">
+        <h1>Bienvenue dans LaDiscorde</h1>
+        <p>Sélectionne un utilisateur à droite pour commencer une discussion privée ou choisis un serveur à gauche</p>
+      </div>
+      <div id="input-zone" style="display:none;">
+        <input type="text" id="messageInput" placeholder="Écris un message...">
         <button id="sendBtn" class="title">Envoyer</button>
       </div>
     </main>
+
+    <!-- PANNEAU UTILISATEURS EN LIGNE -->
+    <aside class="users-panel">
+      <div class="users-header">
+        <h3>En ligne</h3>
+        <span class="online-count" id="online-count">0</span>
+      </div>
+      <div class="users-list" id="users-list"></div>
+    </aside>
 
   </div>
 
@@ -61,6 +107,22 @@
   <footer class="bottombar">
     <p>Chat général — LaDiscorde</p>
   </footer>
+
+  <!-- MODALE CRÉATION GROUPE (une seule, propre) -->
+  <div id="modal-creer-groupe" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:#1a1a1a; padding:25px; border-radius:12px; border:1px solid #c0000e; width:350px; box-shadow:0 0 20px rgba(0,0,0,0.5);">
+      <h2 style="color:white; margin-top:0; margin-bottom:20px; font-size:1.2rem;">Créer un nouveau groupe</h2>
+
+      <label style="color:#aaa; font-size:12px; display:block; margin-bottom:8px;">NOM DU GROUPE</label>
+      <input id="champ-nom-groupe" type="text" placeholder="Ex: Les métalleux"
+        style="width:100%; padding:12px; background:#333; border:1px solid #444; color:white; border-radius:5px; margin-bottom:20px; outline:none; box-sizing:border-box;">
+
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button onclick="fermerModalGroupe()" style="background:transparent; color:white; border:none; cursor:pointer; padding:8px 15px;">Annuler</button>
+        <button onclick="validerCreationGroupe()" style="background:#c0000e; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">Créer le groupe</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // Vérification session
