@@ -781,8 +781,8 @@ body.chat-body {
     color: rgba(255,0,0,0.8);
     font-size: 14px;
     transition: all 0.3s ease;
-    padding: 4px 6px;
-    border-radius: 4px;
+    padding: 5px;
+    border-radius: 6px;
     flex-shrink: 0;
 }
 .btn-deco:hover {
