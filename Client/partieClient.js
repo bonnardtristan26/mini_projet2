@@ -473,7 +473,7 @@ fetch('/verifier-session')
       
       // Envoyer les infos au serveur si la connection WebSocket est déjà établie
       if (socket.readyState === WebSocket.OPEN) {
-        socket.envoi(JSON.stringify({
+        socket.send(JSON.stringify({
           type: "user_connect",
           idUtilisateur: monIDUtilisateur,
           pseudo: monPseudo
@@ -487,7 +487,7 @@ socket.addEventListener("open", () => {
   
   // Envoyer les infos de l'utilisateur au serveur
   if (sessionLoaded) {
-    socket.envoi(JSON.stringify({
+    socket.send(JSON.stringify({
       type: "user_connect",
       idUtilisateur: monIDUtilisateur,
       pseudo: monPseudo
@@ -525,15 +525,9 @@ socket.addEventListener("message", (event) => {
   }
 
   const estMoi = data.pseudo === monPseudo;
-<<<<<<< HEAD
   const utilisateur = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === data.pseudo);
   let avatarSrc = utilisateur && utilisateur.avatar ? utilisateur.avatar : "/Ressource/Image/logo_LaDiscorde.png";
   let heure = data.heure ? data.heure : "";
-=======
-  const user = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === data.pseudo);
-  let avatarSrc = user && user.avatar ? user.avatar : "/Ressource/Image/logo_LaDiscorde.png";
-  let heure = data.timestamp || data.heure || "";
->>>>>>> 560bcde8c71d706f2fde56c9a99676a92e04be11
   if (heure) {
     const date = new Date(heure);
     heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -579,7 +573,7 @@ sendBtn.addEventListener("click", () => {
       timestamp: new Date().toISOString()
     };
     
-    socket.envoi(JSON.stringify(message));
+    socket.send(JSON.stringify(message));
     saisie.value = "";
   }
 });
