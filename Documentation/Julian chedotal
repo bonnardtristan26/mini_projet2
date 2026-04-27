@@ -19,3 +19,9 @@ Le groupe apparaît ensuite dans la liste et l'interface se met à jour.
 On peut aussi ouvrir une autre fenêtre pour voir les membres du groupe.
 Dans cette fenêtre, on peut ajouter un membre en tapant son pseudo.
 Tout se passe en direct avec des appels au serveur pour charger les groupes et les membres.
+
+## 5. Affichage de l'heure à coté du message
+Chaque message qui arrive du serveur a un timestamp (horodatage) qui nous permet de savoir quand il a été envoyé.
+On récupère cette heure et on la formate pour qu'elle soit lisible : on l'affiche en format 24h avec des heures et des minutes (ex: 14h42).
+Le code utilise `toLocaleTimeString()` pour convertir la date en heure locale de l'utilisateur.
+L'heure s'affiche à coté du pseudo de la personne qui a écrit le message.

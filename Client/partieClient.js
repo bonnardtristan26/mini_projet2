@@ -722,15 +722,13 @@ async function senduser() {
         return;
     }
 
-    // 1. On hache le mot de passe côté client AVANT de l'envoyer
     const hashedPassword = await sha256(password);
 
-    // 2. On envoie au serveur PHP (le mdp en clair ne circule jamais)
     try {
         const reponse = await fetch('/inscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nomUtilisateur, password: hashedPassword, email })
+            body: JSON.stringify({ username: nomUtilisateur, password: hashedPassword, email }) 
         });
 
         const data = await reponse.json();
@@ -765,7 +763,7 @@ async function login() {
         const reponse = await fetch('/connexion', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nomUtilisateur, password: hashedPassword}) 
+            body: JSON.stringify({ username: nomUtilisateur, password: hashedPassword })
         });
 
         const data = await reponse.json();
