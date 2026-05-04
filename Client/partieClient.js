@@ -1,3 +1,135 @@
+// ═════════════════════════════════════════════════════════════════════════════
+// SYSTÈME DE NOTIFICATIONS
+// — Pages formulaire : message inline sous le bouton (style grands réseaux)
+// — Page chat       : fine barre en bas de l'écran (style Discord)
+// ═════════════════════════════════════════════════════════════════════════════
+
+(function() {
+  const style = document.createElement('style');
+  style.textContent = `
+    /* ── Erreur inline formulaire ── */
+    .form-notif {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: Arial, sans-serif;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+    }
+    .form-notif.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .form-notif.notif-erreur {
+      background: rgba(192, 0, 14, 0.12);
+      border: 1px solid rgba(192, 0, 14, 0.35);
+      color: #ff6b6b;
+    }
+    .form-notif.notif-succes {
+      background: rgba(76, 175, 80, 0.12);
+      border: 1px solid rgba(76, 175, 80, 0.35);
+      color: #81c784;
+    }
+    .form-notif .fn-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .form-notif.notif-erreur .fn-dot { background: #c0000e; }
+    .form-notif.notif-succes .fn-dot { background: #4caf50; }
+
+    /* ── Barre chat (page principale) ── */
+    #chat-notif-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 9px 20px;
+      font-size: 13px;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 99999;
+      transform: translateY(100%);
+      transition: transform 0.22s ease;
+    }
+    #chat-notif-bar.visible  { transform: translateY(0); }
+    #chat-notif-bar.notif-erreur { background: #3b0a0a; border-top: 2px solid #c0000e; color: #ff8a80; }
+    #chat-notif-bar.notif-succes { background: #0a2b0a; border-top: 2px solid #4caf50; color: #a5d6a7; }
+    #chat-notif-bar.notif-info   { background: #0a1a2b; border-top: 2px solid #2196f3; color: #90caf9; }
+    #chat-notif-bar .cnb-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    #chat-notif-bar.notif-erreur .cnb-dot { background: #c0000e; }
+    #chat-notif-bar.notif-succes .cnb-dot { background: #4caf50; }
+    #chat-notif-bar.notif-info   .cnb-dot { background: #2196f3; }
+  `;
+  document.head.appendChild(style);
+})();
+
+// ── Timers pour éviter les chevauchements ──────────────────────────────────
+let _formNotifTimer = null;
+let _chatNotifTimer = null;
+
+function notif(texte, type = 'erreur', duree = 4000) {
+  // Page formulaire : zone inline présente ?
+  const zone = document.getElementById('notif-zone');
+  if (zone) {
+    _afficherFormNotif(zone, texte, type, duree);
+    return;
+  }
+  // Page chat : barre en bas
+  _afficherChatBar(texte, type, duree);
+}
+
+function _afficherFormNotif(zone, texte, type, duree) {
+  // Réutilise ou crée l'élément
+  let el = zone.querySelector('.form-notif');
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'form-notif';
+    el.innerHTML = '<span class="fn-dot"></span><span class="fn-txt"></span>';
+    zone.appendChild(el);
+  }
+  el.className = `form-notif notif-${type}`;
+  el.querySelector('.fn-txt').textContent = texte;
+
+  // Forcer reflow pour relancer la transition si déjà visible
+  void el.offsetWidth;
+  el.classList.add('visible');
+
+  clearTimeout(_formNotifTimer);
+  _formNotifTimer = setTimeout(() => {
+    el.classList.remove('visible');
+  }, duree);
+}
+
+function _afficherChatBar(texte, type, duree) {
+  let bar = document.getElementById('chat-notif-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'chat-notif-bar';
+    bar.innerHTML = '<span class="cnb-dot"></span><span class="cnb-txt"></span>';
+    document.body.appendChild(bar);
+  }
+  bar.className = `notif-${type}`;
+  bar.querySelector('.cnb-txt').textContent = texte;
+
+  void bar.offsetWidth;
+  bar.classList.add('visible');
+
+  clearTimeout(_chatNotifTimer);
+  _chatNotifTimer = setTimeout(() => {
+    bar.classList.remove('visible');
+  }, duree);
+}
+
 const estPageChat = !!document.getElementById("messages");
 
 // Variables globales pour l'easter egg (peuvent exister ou être null)
@@ -636,10 +768,10 @@ avatarChoices.forEach(img => {
         avatarDiv.innerHTML = `<img src='${data.url}' alt='Avatar' style='width:32px;height:32px;border-radius:50%;object-fit:cover;'>`;
         localStorage.setItem("userAvatar", data.url);
       } else {
-        alert("Erreur lors du choix de l'avatar");
+        notif("Erreur lors du choix de l'avatar.", 'erreur');
       }
     } catch (err) {
-      alert("Erreur lors du choix de l'avatar");
+      notif("Erreur lors du choix de l'avatar.", 'erreur');
     }
     modalSettings.style.display = "none";
   });
@@ -667,10 +799,10 @@ avatarUpload.addEventListener("change", async (e) => {
         // Optionnel : stocker l'URL pour affichage local immédiat
         localStorage.setItem("userAvatar", data.url);
       } else {
-        alert("Erreur lors de l'upload de l'avatar");
+        notif("Erreur lors de l'upload de l'avatar.", 'erreur');
       }
     } catch (err) {
-      alert("Erreur lors de l'upload de l'avatar");
+      notif("Erreur lors de l'upload de l'avatar.", 'erreur');
     }
     modalSettings.style.display = "none";
   };
@@ -720,7 +852,7 @@ async function senduser() {
     const email    = document.getElementById('email').value.trim();
 
     if (!nomUtilisateur || !password) {
-        alert("Remplis tous les champs !");
+        notif("Remplis tous les champs !", 'erreur');
         return;
     }
 
@@ -736,13 +868,13 @@ async function senduser() {
         const data = await reponse.json();
 
         if (data.success) {
-            alert("Compte créé ! Tu peux te connecter.");
-            window.location.href = "login.html"; // redirige vers la page de connexion
+            notif("Compte créé ! Vérifie tes emails.", 'succes', 5000);
+            setTimeout(() => { window.location.href = "login.html"; }, 1500);
         } else {
-            alert("Erreur : " + data.message);
+            notif(data.message, 'erreur');
         }
     } catch (err) {
-        alert("Impossible de joindre le serveur.");
+        notif("Impossible de joindre le serveur.", 'erreur');
         console.error(err);
     }
 }
@@ -753,7 +885,7 @@ async function login() {
     const password = document.getElementById('password').value;
 
     if (!nomUtilisateur || !password) {
-        alert("Remplis tous les champs !");
+        notif("Remplis tous les champs !", 'erreur');
         return;
     }
 
@@ -771,13 +903,12 @@ async function login() {
         const data = await reponse.json();
 
         if (data.success) {
-            alert("Connecté ! Bienvenue " + data.nomUtilisateur);
             window.location.href = "chat_general.html";
         } else {
-            alert("Erreur : " + data.message);
+            notif(data.message, 'erreur');
         }
     } catch (err) {
-        alert("Impossible de joindre le serveur.");
+        notif("Impossible de joindre le serveur.", 'erreur');
         console.error(err);
     }
 }
@@ -844,11 +975,11 @@ async function validerCreationGroupe() {
       fermerModalGroupe();
       await rafraichirGroupes();
     } else {
-      alert('Erreur : ' + data.message);
+      notif(data.message, 'erreur');
     }
   } catch (e) {
     console.error('Erreur création groupe :', e);
-    alert('Le serveur ne répond pas. ' + (e.message || '')); 
+    notif('Le serveur ne répond pas.', 'erreur');
   }
 }
 
@@ -955,7 +1086,7 @@ async function ajouterMembreGroupe() {
     document.getElementById('input-ajout-membre').value = '';
     await chargerMembres(groupeId);
   } else {
-    alert(data.message || 'Erreur');
+    notif(data.message || 'Utilisateur introuvable.', 'erreur');
   }
 }
 

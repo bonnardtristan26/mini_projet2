@@ -188,6 +188,151 @@ wss.on("connection", (ws) => {
   });
 });
 
+// ══════════════════════════════════════════════════════════════════════════════════
+// ROUTES RÉINITIALISATION MOT DE PASSE
+// ══════════════════════════════════════════════════════════════════════════════════
+
+// Étape 1 : demande de reset (envoi du lien par email)
+app.post("/demande-reset", async (req, res) => {
+    const { email } = req.body;
+
+    // Réponse générique pour ne pas confirmer si l'email existe (sécurité)
+    const reponseGenerique = { success: true };
+
+    if (!email || !email.includes('@')) {
+        return res.json(reponseGenerique);
+    }
+
+    try {
+        const [rows] = await db.execute(
+            "SELECT id, username FROM utilisateurs WHERE email = ? AND email_verifie = 1",
+            [email]
+        );
+
+        if (rows.length === 0) {
+            // On ne révèle pas que l'email n'existe pas
+            return res.json(reponseGenerique);
+        }
+
+        const user = rows[0];
+        const token = crypto.randomUUID().replace(/-/g, '');
+        const expiration = new Date(Date.now() + 60 * 60 * 1000); // +1h
+
+        await db.execute(
+            "UPDATE utilisateurs SET reset_token = ?, reset_expires = ? WHERE id = ?",
+            [token, expiration, user.id]
+        );
+
+        const lienReset = `http://localhost:3000/reset_mdp.html?token=${token}`;
+
+        const htmlMail = `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="UTF-8"></head>
+        <body style="margin:0;padding:0;background:#0d0d0d;font-family:Arial,sans-serif;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d0d;padding:40px 0;">
+                <tr><td align="center">
+                    <table width="480" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:12px;border:1px solid rgba(200,0,0,0.4);overflow:hidden;">
+                        <tr>
+                            <td style="background:linear-gradient(135deg,#8b0000,#c0000e);padding:32px;text-align:center;">
+                                <h1 style="color:white;margin:0;font-size:28px;letter-spacing:3px;">LaDiscorde</h1>
+                                <p style="color:rgba(255,255,255,0.75);margin:6px 0 0;font-size:13px;letter-spacing:1px;">RÉINITIALISATION DU MOT DE PASSE</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:36px 40px;">
+                                <h2 style="color:white;font-size:20px;margin:0 0 12px;">Réinitialise ton mot de passe</h2>
+                                <p style="color:#aaa;font-size:14px;line-height:1.6;margin:0 0 24px;">
+                                    Salut <strong style="color:white;">${user.username}</strong> !<br><br>
+                                    Tu as demandé à réinitialiser ton mot de passe sur <strong style="color:#c0000e;">LaDiscorde</strong>.
+                                    Clique sur le bouton ci-dessous. Ce lien est valable <strong style="color:white;">1 heure</strong>.
+                                </p>
+                                <table cellpadding="0" cellspacing="0" style="margin:0 auto 28px;">
+                                    <tr>
+                                        <td style="background:#c0000e;border-radius:8px;">
+                                            <a href="${lienReset}" style="display:inline-block;padding:14px 36px;color:white;text-decoration:none;font-weight:bold;font-size:15px;letter-spacing:1.5px;">
+                                                RÉINITIALISER MON MOT DE PASSE
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <p style="color:#666;font-size:12px;text-align:center;margin:0;">
+                                    Si tu n'es pas à l'origine de cette demande, ignore ce mail. Ton mot de passe ne sera pas modifié.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="background:#111;padding:18px;text-align:center;border-top:1px solid rgba(200,0,0,0.2);">
+                                <p style="color:#444;font-size:11px;margin:0;">© LaDiscorde — noreply.ladiscorde@gmail.com</p>
+                            </td>
+                        </tr>
+                    </table>
+                </td></tr>
+            </table>
+        </body>
+        </html>`;
+
+        await fetch("https://api.brevo.com/v3/smtp/email", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": "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"
+            },
+            body: JSON.stringify({
+                sender: { name: "LaDiscorde", email: "ztoxyu@gmail.com" },
+                to: [{ email: email, name: user.username }],
+                subject: "Réinitialisation de ton mot de passe — LaDiscorde",
+                htmlContent: htmlMail
+            })
+        });
+
+        console.log(`Lien de reset envoyé à : ${email} (user: ${user.username})`);
+        return res.json(reponseGenerique);
+
+    } catch (err) {
+        console.error("Erreur demande-reset :", err);
+        return res.json(reponseGenerique);
+    }
+});
+
+// Étape 2 : validation du token et mise à jour du mot de passe
+app.post("/reset-mdp", async (req, res) => {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+        return res.json({ success: false, message: "Données manquantes." });
+    }
+    if (!/^[a-f0-9]{64}$/.test(password)) {
+        return res.json({ success: false, message: "Format de mot de passe invalide." });
+    }
+
+    try {
+        const [rows] = await db.execute(
+            "SELECT id, username FROM utilisateurs WHERE reset_token = ? AND reset_expires > NOW()",
+            [token]
+        );
+
+        if (rows.length === 0) {
+            return res.json({ success: false, message: "Lien invalide ou expiré. Fais une nouvelle demande." });
+        }
+
+        const user = rows[0];
+        const hashFinal = await bcrypt.hash(password, 12);
+
+        await db.execute(
+            "UPDATE utilisateurs SET password_hash = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?",
+            [hashFinal, user.id]
+        );
+
+        console.log(`Mot de passe réinitialisé pour : ${user.username}`);
+        return res.json({ success: true });
+
+    } catch (err) {
+        console.error("Erreur reset-mdp :", err);
+        return res.json({ success: false, message: "Erreur serveur." });
+    }
+});
+
 server.listen(3000, () => {
   console.log("Serveur lancé sur http://localhost:3000");
 });

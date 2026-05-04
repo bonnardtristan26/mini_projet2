@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaDiscorde - Réinitialiser le mot de passe</title>
+    <link rel="icon" type="image/png" href="/Ressource/Image/logo_LaDiscorde_favicon.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- BACK BUTTON -->
+    <a href="login.html" class="back-btn">← Retour</a>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content" style="flex: 1; display: flex; flex-direction: column; background: rgba(10, 10, 10, 0.5);">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-title" id="page-titre">Mot de passe oublié</div>
+            <div style="font-size: 13px; color: rgba(200, 200, 200, 0.7);" id="page-sous-titre">Reçois un lien de réinitialisation par email</div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div class="content login-page">
+            <div class="login-container">
+                <div style="text-align: center;">
+                    <img src="../Ressource/Image/logo_LaDiscorde.png" alt="LaDiscorde Logo" class="form-logo">
+                </div>
+
+                <!-- ── ÉTAPE 1 : saisir son email ── -->
+                <div id="etape-email">
+                    <h2 class="login-title">Réinitialisation</h2>
+                    <div class="form-group">
+                        <label for="email">Adresse Email</label>
+                        <input type="email" id="email" placeholder="Entrez votre email" required>
+                    </div>
+                    <button type="button" class="btn-login" onclick="demanderReset()">Envoyer le lien</button>
+                    <div id="notif-zone"></div>
+                    <div id="msg-email" style="margin-top: 14px; font-size: 13px; text-align: center;"></div>
+                </div>
+
+                <!-- ── ÉTAPE 2 : nouveau mot de passe (visible si ?token= dans l'URL) ── -->
+                <div id="etape-nouveau-mdp" style="display: none;">
+                    <h2 class="login-title">Nouveau mot de passe</h2>
+                    <div class="form-group">
+                        <label for="nouveau-mdp">Nouveau mot de passe</label>
+                        <input type="password" id="nouveau-mdp" placeholder="Choisissez un nouveau mot de passe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmer-mdp">Confirmer le mot de passe</label>
+                        <input type="password" id="confirmer-mdp" placeholder="Confirmez le nouveau mot de passe" required>
+                    </div>
+                    <button type="button" class="btn-login" onclick="reinitialiserMdp()">Changer le mot de passe</button>
+                    <div id="msg-reset" style="margin-top: 14px; font-size: 13px; text-align: center;"></div>
+                </div>
+
+                <!-- ── ÉTAPE 3 : confirmation finale ── -->
+                <div id="etape-succes" style="display: none; text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+                    <h2 class="login-title" style="color: #4caf50;">Mot de passe changé !</h2>
+                    <p style="color: rgba(200,200,200,0.7); font-size: 14px; margin-bottom: 24px;">
+                        Ton mot de passe a bien été mis à jour.<br>Tu peux maintenant te connecter.
+                    </p>
+                    <a href="login.html" class="btn-login" style="display: inline-block; text-decoration: none; text-align: center;">
+                        Se connecter
+                    </a>
+                </div>
+
+                <div class="login-links" id="lien-retour">
+                    <a href="login.html">Retour à la connexion</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="partieClient.js"></script>
+    <script>
+        // ── Détecter si on est sur l'étape 2 (lien de reset reçu par mail) ──────────
+        const params = new URLSearchParams(window.location.search);
+        const tokenReset = params.get('token');
+
+        if (tokenReset) {
+            document.getElementById('etape-email').style.display = 'none';
+            document.getElementById('etape-nouveau-mdp').style.display = 'block';
+            document.getElementById('page-titre').textContent = 'Nouveau mot de passe';
+            document.getElementById('page-sous-titre').textContent = 'Choisis ton nouveau mot de passe';
+        }
+
+        // ── Étape 1 : demande d'envoi du lien ────────────────────────────────────────
+        async function demanderReset() {
+            const email = document.getElementById('email').value.trim();
+
+            if (!email) {
+                notif('Saisis ton adresse email.', 'erreur');
+                return;
+            }
+
+            const btn = document.querySelector('#etape-email .btn-login');
+            btn.disabled = true;
+            btn.textContent = 'Envoi en cours...';
+
+            try {
+                const res = await fetch('/demande-reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                await res.json();
+
+                notif('Si cet email est associé à un compte, un lien t\'a été envoyé.', 'succes', 6000);
+            } catch (err) {
+                notif('Impossible de joindre le serveur.', 'erreur');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Envoyer le lien';
+            }
+        }
+
+        // ── Étape 2 : définir le nouveau mot de passe ────────────────────────────────
+        async function reinitialiserMdp() {
+            const nouveauMdp = document.getElementById('nouveau-mdp').value;
+            const confirmerMdp = document.getElementById('confirmer-mdp').value;
+
+            if (!nouveauMdp || !confirmerMdp) {
+                notif('Remplis les deux champs.', 'erreur');
+                return;
+            }
+            if (nouveauMdp !== confirmerMdp) {
+                notif('Les mots de passe ne correspondent pas.', 'erreur');
+                return;
+            }
+            if (nouveauMdp.length < 6) {
+                notif('Le mot de passe doit faire au moins 6 caractères.', 'erreur');
+                return;
+            }
+
+            const btn = document.querySelector('#etape-nouveau-mdp .btn-login');
+            btn.disabled = true;
+            btn.textContent = 'Mise à jour...';
+
+            const hashedPassword = await sha256(nouveauMdp);
+
+            try {
+                const res = await fetch('/reset-mdp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: tokenReset, password: hashedPassword })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('etape-nouveau-mdp').style.display = 'none';
+                    document.getElementById('etape-succes').style.display = 'block';
+                    document.getElementById('lien-retour').style.display = 'none';
+                } else {
+                    notif(data.message || 'Lien invalide ou expiré.', 'erreur');
+                }
+            } catch (err) {
+                notif('Impossible de joindre le serveur.', 'erreur');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Changer le mot de passe';
+            }
+        }
+
+        // ── Utilitaire affichage message (conservé pour compatibilité) ────────────────
+        function afficherMsg(el, texte, succes) {
+            el.textContent = texte;
+            el.style.color = succes ? '#4caf50' : '#e53935';
+        }
+    </script>
+</body>
+</html>
