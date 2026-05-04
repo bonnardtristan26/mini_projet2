@@ -467,15 +467,15 @@ fetch('/verifier-session')
   .then(r => r.json())
   .then(data => { 
     if (data.connecte) {
-      monPseudo = data.nomUtilisateur;
-      monIDUtilisateur = data.idUtilisateur;
+      monPseudo = data.username;
+      monIDUtilisateur = data.userId;
       sessionLoaded = true;
       
       // Envoyer les infos au serveur si la connection WebSocket est déjà établie
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
           type: "user_connect",
-          idUtilisateur: monIDUtilisateur,
+          userId: monIDUtilisateur,
           pseudo: monPseudo
         }));
       }
@@ -489,7 +489,7 @@ socket.addEventListener("open", () => {
   if (sessionLoaded) {
     socket.send(JSON.stringify({
       type: "user_connect",
-      idUtilisateur: monIDUtilisateur,
+      userId: monIDUtilisateur,
       pseudo: monPseudo
     }));
   }
@@ -513,7 +513,7 @@ socket.addEventListener("message", (event) => {
   if (data.type === "online_users") {
     utilisateursEnLigne = new Map();
     data.users.forEach(utilisateur => {
-      utilisateursEnLigne.set(utilisateur.idUtilisateur, { pseudo: utilisateur.pseudo, avatar: utilisateur.avatar });
+      utilisateursEnLigne.set(utilisateur.userId, { pseudo: utilisateur.pseudo, avatar: utilisateur.avatar });
     });
     afficherUtilisateurs();
     return;
@@ -566,7 +566,7 @@ sendBtn.addEventListener("click", () => {
   if (saisie.value.trim() !== "") {
     const message = {
       pseudo: monPseudo,
-      idUtilisateur: monIDUtilisateur,
+      userId: monIDUtilisateur,
       texte: saisie.value.trim(),
       canal: canalActuel,
       type: typeCanal,
@@ -600,11 +600,13 @@ const avatarUpload = document.getElementById("avatar-upload");
 const importedAvatarPreview = document.getElementById("imported-avatar-preview");
 const descriptionUtilisateur = document.getElementById("user-description");
 
+if (btnSettings) {
 btnSettings.addEventListener("click", () => {
   modalSettings.style.display = "flex";
   // Charger description si déjà enregistrée
   descriptionUtilisateur.value = localStorage.getItem("userDescription") || "";
 });
+}
 closeSettings.addEventListener("click", () => {
   modalSettings.style.display = "none";
   localStorage.setItem("userDescription", descriptionUtilisateur.value);
@@ -627,7 +629,7 @@ avatarChoices.forEach(img => {
       const res = await fetch("/upload-avatar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idUtilisateur: monIDUtilisateur, baseAvatar: img.dataset.avatar })
+        body: JSON.stringify({ userId: monIDUtilisateur, baseAvatar: img.dataset.avatar })
       });
       const data = await res.json();
       if (data.success && data.url) {
@@ -657,7 +659,7 @@ avatarUpload.addEventListener("change", async (e) => {
       const res = await fetch("/upload-avatar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idUtilisateur: monIDUtilisateur, imageBase64: ev.target.result })
+        body: JSON.stringify({ userId: monIDUtilisateur, imageBase64: ev.target.result })
       });
       const data = await res.json();
       if (data.success && data.url) {
@@ -933,7 +935,7 @@ async function chargerMembres(groupeId) {
     data.membres.forEach(m => {
       const div = document.createElement('div');
       div.style.cssText = 'padding:6px 0; color:#ccc; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.05);';
-      div.textContent = '👤 ' + m.nomUtilisateur;
+      div.textContent = '👤 ' + m.username;
       liste.appendChild(div);
     });
   }
