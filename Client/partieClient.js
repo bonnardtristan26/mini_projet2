@@ -1,24 +1,28 @@
 const estPageChat = !!document.getElementById("messages");
 
+// Variables globales pour l'easter egg (peuvent exister ou être null)
+const logo = document.getElementById('logo_la_discorde');
+const musique = document.getElementById('musique-easter-egg');
+
 if (estPageChat) {
 
 const socket = new WebSocket(`ws://${window.location.hostname}:3000`);
 
 const messagesDiv = document.getElementById("messages");
-const input = document.getElementById("messageInput");
-const sendBtn = document.getElementById("sendBtn");
-const channelHeader = document.querySelector(".chat-header");
-const usersList = document.getElementById("users-list");
-const welcomeZone = document.getElementById("welcome-zone");
-const inputZone = document.getElementById("input-zone");
-const mpList = document.getElementById("mp-list");
-const serversIcons = document.getElementById("servers-icons");
-const channelsList = document.getElementById("channels-list");
-const sidebarHeader = document.getElementById("sidebar-header");
-const centerSidebar = document.getElementById("center-sidebar");
+const saisie = document.getElementById("messageInput");
+const envoiBtn = document.getElementById("sendBtn");
+const headerCanal = document.querySelector(".chat-header");
+const listeUtilisateurs = document.getElementById("users-list");
+const zoneAccueil = document.getElementById("welcome-zone");
+const saisieZone = document.getElementById("input-zone");
+const mpListe = document.getElementById("mp-list");
+const iconesServeurs = document.getElementById("servers-icons");
+const listeCanaux = document.getElementById("channels-list");
+const headerBarreLaterale = document.getElementById("sidebar-header");
+const centreBarreLaterale = document.getElementById("center-sidebar");
 
 let monPseudo = "";
-let monUserId = "";
+let monIDUtilisateur = "";
 let canalActuel = null;
 let typeCanal = null;
 let utilisateursEnLigne = new Map();
@@ -62,10 +66,22 @@ const serveurs = [
 // HISTORIQUE DES MESSAGES (Base de données)
 // ═════════════════════════════════════════════════════════════════════════════
 
-async function chargerHistorique(canal, type) {
+async function chargerHistorique(canal, type) { 
+  /*/
+  /////////////////////////
+  PARAMETRES DE LA FONCTION
+  /////////////////////////
+  
+  CANAL désigne les noms des canaux utilisés.
+  Un canal peut être un Message Privé, un Groupe ou un Canal de serveur Public
+
+  TYPE désigne le type de la discussion
+  Une discussion peut être Privée, Publique ou en Groupe
+  /*/
+
   try {
-    const response = await fetch(`/historique/${canal}/${type}`);
-    const data = await response.json();
+    const reponse = await fetch(`/historique/${canal}/${type}`);
+    const data = await reponse.json();
     
     if (data.success) {
       return data.messages;
@@ -80,18 +96,51 @@ async function chargerHistorique(canal, type) {
 }
 
 function afficherMessages(messages) {
+  /*/
+  /////////////////////////
+  PARAMETRES DE LA FONCTION
+  /////////////////////////
+
+  MESSAGES désigne les messages reçus
+  /*/
+
+  //Définir le div de messages comme vide
   messagesDiv.innerHTML = "";
   
   messages.forEach(msg => {
+    //Attribuer le message qui sera affiché au dessus de message envoyé par rapport à la personne ayant envoyé le message
     const estMoi = msg.pseudo === monPseudo;
+    const utilisateur = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === msg.pseudo);
+    //Avatar de base défini comme le logo de La Discorde
+    let avatarSrc = utilisateur && utilisateur.avatar ? utilisateur.avatar : "/Ressource/Image/logo_LaDiscorde.png";
+    // Format de l'heure
+    let heure = msg.timestamp || msg.heure || "";
+    if (heure) {
+      const date = new Date(heure);
+      heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      heure = heure.replace(":", "h");
+    }
     const div = document.createElement("div");
     div.classList.add("message-row");
     div.classList.add(estMoi ? "moi" : "autre");
 
-    div.innerHTML = `
-      <div class="msg-pseudo">${msg.pseudo}</div>
-      <div class="msg-bubble">${msg.texte}</div>`;
-
+    if (estMoi) {
+      div.innerHTML = `
+        <div class=\"msg-header\">
+          <div class=\"msg-heure\">${heure}</div>
+          <div class=\"msg-pseudo\">${msg.pseudo}</div>
+          <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+        </div>
+        <div class=\"msg-bubble\">${msg.texte}</div>`;
+    } else {
+      div.innerHTML = `
+        <div class=\"msg-header\">
+          <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+          <div class=\"msg-pseudo\">${msg.pseudo}</div>
+          <div class=\"msg-heure\">${heure}</div>
+        </div>
+        <div class=\"msg-bubble\">${msg.texte}</div>`;
+    }
     messagesDiv.appendChild(div);
   });
   
@@ -103,43 +152,45 @@ function afficherMessages(messages) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function afficherUtilisateurs() {
-  usersList.innerHTML = "";
-  utilisateursEnLigne.forEach((user, userId) => {
+  listeUtilisateurs.innerHTML = "";
+  utilisateursEnLigne.forEach((utilisateur, idUtilisateur) => {
     // Ne pas afficher soi-même
-    if (userId === monUserId) return;
-    
-    const userItem = document.createElement("div");
-    userItem.classList.add("user-item");
-    userItem.id = `user-${userId}`;
-    userItem.innerHTML = `
+    if (idUtilisateur === monIDUtilisateur) return;
+
+    // Avatar : utiliser l'URL reçue du serveur
+    let avatarSrc = utilisateur.avatar || "/Ressource/Image/logo_LaDiscorde.png";
+
+    const objetUtilisateur = document.createElement("div");
+    objetUtilisateur.classList.add("user-item");
+    objetUtilisateur.id = `utilisateur-${idUtilisateur}`;
+    objetUtilisateur.innerHTML = `
       <div class="user-avatar">
-        ${user.pseudo.charAt(0).toUpperCase()}
+        <img src="${avatarSrc}" alt="avatar" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
         <div class="online-badge"></div>
       </div>
-      <div class="user-name">${user.pseudo}</div>
+      <div class="user-name">${utilisateur.pseudo}</div>
     `;
-    
-    userItem.addEventListener("click", () => {
-      ouvrirMessagePrive(user.pseudo, userId);
+
+    objetUtilisateur.addEventListener("click", () => {
+      ouvrirMessagePrive(utilisateur.pseudo, idUtilisateur);
     });
-    
-    usersList.appendChild(userItem);
+
+    listeUtilisateurs.appendChild(objetUtilisateur);
   });
-  
   // Mettre à jour le compteur
   document.getElementById("online-count").textContent = utilisateursEnLigne.size - 1;
 }
 
 function afficherBienvenue() {
   messagesDiv.style.display = "none";
-  inputZone.style.display = "none";
-  welcomeZone.style.display = "flex";
+  saisieZone.style.display = "none";
+  zoneAccueil.style.display = "flex";
 }
 
 function afficherChat() {
   messagesDiv.style.display = "flex";
-  inputZone.style.display = "flex";
-  welcomeZone.style.display = "none";
+  saisieZone.style.display = "flex";
+  zoneAccueil.style.display = "none";
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -147,7 +198,7 @@ function afficherChat() {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function afficherServeurs() {
-  serversIcons.innerHTML = "";
+  iconesServeurs.innerHTML = "";
   
   // Bouton pour retourner aux MP
   const mpButton = document.createElement("div");
@@ -163,14 +214,14 @@ function afficherServeurs() {
     afficherMessagePrives();
   });
   
-  serversIcons.appendChild(mpButton);
+  iconesServeurs.appendChild(mpButton);
   
   // Ajouter une ligne de séparation
   const separator = document.createElement("div");
   separator.style.height = "1px";
   separator.style.background = "rgba(200,0,0,0.2)";
   separator.style.margin = "10px 0";
-  serversIcons.appendChild(separator);
+  iconesServeurs.appendChild(separator);
   
   serveurs.forEach(serveur => {
     const serverIcon = document.createElement("div");
@@ -194,7 +245,7 @@ function afficherServeurs() {
       selectionnerServeur(serveur.id);
     });
     
-    serversIcons.appendChild(serverIcon);
+    iconesServeurs.appendChild(serverIcon);
   });
 }
 
@@ -216,14 +267,15 @@ function selectionnerServeur(serveurId) {
 
 function afficherSalons(salons, nomServeur) {
   // Masquer les MP
-  mpList.style.display = "none";
+  mpListe.style.display = "none";
+  document.getElementById('groupes-list').style.display = "none"; //masquer les groupes aussi
   
   // Afficher les salons
-  channelsList.style.display = "flex";
-  channelsList.innerHTML = "";
+  listeCanaux.style.display = "flex";
+  listeCanaux.innerHTML = "";
   
-  // Mettre à jour le header
-  sidebarHeader.innerHTML = nomServeur;
+  // Mettre à jour le titre sans écraser le bouton +
+  document.getElementById('sidebar-header-title').textContent = nomServeur;
   
   salons.forEach(salon => {
     const salonItem = document.createElement("div");
@@ -236,23 +288,23 @@ function afficherSalons(salons, nomServeur) {
       selectionnerSalon(salon, serveurActuel);
     });
     
-    channelsList.appendChild(salonItem);
+    listeCanaux.appendChild(salonItem);
   });
 }
 
 function afficherMessagePrives() {
   serveurActuel = null;
+  listeCanaux.style.display = "none";
   
-  // Masquer les salons
-  channelsList.style.display = "none";
-  channelsList.innerHTML = "";
-  
-  // Afficher les MP
-  mpList.style.display = "flex";
-  mpList.style.flexDirection = "column";
-  
-  // Mettre à jour le header
-  sidebarHeader.innerHTML = "Messages privés";
+  // Afficher les listes de MP et de Groupes
+  mpListe.style.display = "flex";
+  const groupesList = document.getElementById('groupes-list');
+  if (groupesList) {
+    groupesList.style.display = "flex";
+    rafraichirGroupes(); // Charger les groupes depuis le serveur
+  }
+  // Mettre à jour le titre sans écraser le bouton +
+  document.getElementById('sidebar-header-title').textContent = "Messages privés";
   
   // Mise à jour visuelle des serveurs
   document.querySelectorAll(".server-icon").forEach(icon => {
@@ -261,6 +313,28 @@ function afficherMessagePrives() {
       icon.classList.add("active");
     }
   });
+}
+
+async function rafraichirGroupes() {
+  const groupesList = document.getElementById('groupes-list');
+  if (!groupesList) return;
+  groupesList.innerHTML = '';
+
+  try {
+    const res = await fetch('/groupes');
+    const data = await res.json();
+    if (data.success && Array.isArray(data.groupes)) {
+      data.groupes.forEach(groupe => {
+        const div = document.createElement('div');
+        div.className = 'channel-item'; // Utilise la même classe que les MP
+        div.innerHTML = `👥 ${groupe.nom}`;
+        div.onclick = () => changerCanal('GROUPE_' + groupe.id, 'group', groupe.nom);
+        groupesList.appendChild(div);
+      });
+    }
+  } catch (e) {
+    console.error('Erreur chargement groupes :', e);
+  }
 }
 
 function selectionnerSalon(salon, serveurId) {
@@ -282,22 +356,22 @@ function selectionnerSalon(salon, serveurId) {
 // OUVERTURE D'UN MESSAGE PRIVÉ
 // ═════════════════════════════════════════════════════════════════════════════
 
-function ouvrirMessagePrive(pseudo, userId) {
+function ouvrirMessagePrive(pseudo, idUtilisateur) {
   // Vérifier si le MP existe déjà
-  const canalMP = `MP_${Math.min(monUserId, userId)}_${Math.max(monUserId, userId)}`;
+  const canalMP = `MP_${Math.min(monIDUtilisateur, idUtilisateur)}_${Math.max(monIDUtilisateur, idUtilisateur)}`;
   
   // Vérifier si un item avec ce pseudo existe déjà
-  const existant = mpList.querySelector(`[data-mp-user-id="${userId}"]`);
+  const existant = mpListe.querySelector(`[data-mp-user-id="${idUtilisateur}"]`);
   
   if (!existant) {
     const mpItem = document.createElement("div");
     mpItem.classList.add("channel-item");
     mpItem.setAttribute("data-channel", canalMP);
     mpItem.setAttribute("data-type", "private");
-    mpItem.setAttribute("data-mp-user-id", userId);
+    mpItem.setAttribute("data-mp-user-id", idUtilisateur);
     mpItem.innerHTML = `<img src="/Ressource/Image/logo_LaDiscorde.png" alt="MP" class="mp-logo"> ${pseudo}`;
-    mpList.appendChild(mpItem);
-    
+    mpListe.appendChild(mpItem);
+
     mpItem.addEventListener("click", () => {
       changerCanal(canalMP, "private");
     });
@@ -322,16 +396,16 @@ async function changerCanal(canal, type, titrePersonnalise = null) {
     if (parts.length === 3) {
       const id1 = parseInt(parts[1]);
       const id2 = parseInt(parts[2]);
-      const otherUserId = id1 === monUserId ? id2 : id1;
-      const user = utilisateursEnLigne.get(otherUserId);
-      if (user) titre = user.pseudo;
+      const autreIdUtilisateur = id1 === monIDUtilisateur ? id2 : id1;
+      const utilisateur = utilisateursEnLigne.get(autreIdUtilisateur);
+      if (utilisateur) titre = utilisateur.pseudo;
     }
   }
   
-  channelHeader.innerHTML = `<span>${symbole}</span> ${titre}`;
+  headerCanal.innerHTML = `<span>${symbole}</span> ${titre}`;
   
   // Changement placeholder
-  input.placeholder = type === 'private' 
+  saisie.placeholder = type === 'private' 
     ? `Envoie un message privé à ${titre}...` 
     : `Écris un message dans ${titrePersonnalise || '#' + canal}...`;
   
@@ -362,8 +436,8 @@ async function changerCanal(canal, type, titrePersonnalise = null) {
       if (parts.length === 3) {
         const id1 = parseInt(parts[1]);
         const id2 = parseInt(parts[2]);
-        const otherUserId = id1 === monUserId ? id2 : id1;
-        if (item.id === `user-${otherUserId}`) {
+        const autreIdUtilisateur = id1 === monIDUtilisateur ? id2 : id1;
+        if (item.id === `utilisateur-${autreIdUtilisateur}`) {
           item.classList.add("active");
         }
       }
@@ -394,14 +468,14 @@ fetch('/verifier-session')
   .then(data => { 
     if (data.connecte) {
       monPseudo = data.username;
-      monUserId = data.userId;
+      monIDUtilisateur = data.userId;
       sessionLoaded = true;
       
       // Envoyer les infos au serveur si la connection WebSocket est déjà établie
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
           type: "user_connect",
-          userId: monUserId,
+          userId: monIDUtilisateur,
           pseudo: monPseudo
         }));
       }
@@ -415,7 +489,7 @@ socket.addEventListener("open", () => {
   if (sessionLoaded) {
     socket.send(JSON.stringify({
       type: "user_connect",
-      userId: monUserId,
+      userId: monIDUtilisateur,
       pseudo: monPseudo
     }));
   }
@@ -438,8 +512,8 @@ socket.addEventListener("message", (event) => {
   // Si c'est une mise à jour des utilisateurs en ligne
   if (data.type === "online_users") {
     utilisateursEnLigne = new Map();
-    data.users.forEach(user => {
-      utilisateursEnLigne.set(user.userId, { pseudo: user.pseudo });
+    data.users.forEach(utilisateur => {
+      utilisateursEnLigne.set(utilisateur.userId, { pseudo: utilisateur.pseudo, avatar: utilisateur.avatar });
     });
     afficherUtilisateurs();
     return;
@@ -451,14 +525,35 @@ socket.addEventListener("message", (event) => {
   }
 
   const estMoi = data.pseudo === monPseudo;
+  const utilisateur = Array.from(utilisateursEnLigne.values()).find(u => u.pseudo === data.pseudo);
+  let avatarSrc = utilisateur && utilisateur.avatar ? utilisateur.avatar : "/Ressource/Image/logo_LaDiscorde.png";
+  let heure = data.heure ? data.heure : "";
+  if (heure) {
+    const date = new Date(heure);
+    heure = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    heure = heure.replace(":", "h");
+  }
   const div = document.createElement("div");
   div.classList.add("message-row");
   div.classList.add(estMoi ? "moi" : "autre");
 
-  div.innerHTML = `
-    <div class="msg-pseudo">${data.pseudo}</div>
-    <div class="msg-bubble">${data.texte}</div>`;
-
+  if (estMoi) {
+    div.innerHTML = `
+      <div class=\"msg-header\">
+        <div class=\"msg-heure\">${heure}</div>
+        <div class=\"msg-pseudo\">${data.pseudo}</div>
+        <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+      </div>
+      <div class=\"msg-bubble\">${data.texte}</div>`;
+  } else {
+    div.innerHTML = `
+      <div class=\"msg-header\">
+        <div class=\"msg-avatar\"><img src=\"${avatarSrc}\" alt=\"avatar\" style=\"width:32px;height:32px;border-radius:50%;object-fit:cover;\"></div>
+        <div class=\"msg-pseudo\">${data.pseudo}</div>
+        <div class=\"msg-heure\">${heure}</div>
+      </div>
+      <div class=\"msg-bubble\">${data.texte}</div>`;
+  }
   messagesDiv.appendChild(div);
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 });
@@ -468,21 +563,22 @@ socket.addEventListener("message", (event) => {
 // ═════════════════════════════════════════════════════════════════════════════
 
 sendBtn.addEventListener("click", () => {
-  if (input.value.trim() !== "") {
+  if (saisie.value.trim() !== "") {
     const message = {
       pseudo: monPseudo,
-      userId: monUserId,
-      texte: input.value.trim(),
+      userId: monIDUtilisateur,
+      texte: saisie.value.trim(),
       canal: canalActuel,
-      type: typeCanal
+      type: typeCanal,
+      timestamp: new Date().toISOString()
     };
     
     socket.send(JSON.stringify(message));
-    input.value = "";
+    saisie.value = "";
   }
 });
 
-input.addEventListener("keypress", (e) => {
+saisie.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendBtn.click();
 });
 
@@ -491,8 +587,104 @@ afficherBienvenue();
 afficherServeurs();
 afficherMessagePrives();
 
-// Initialiser l'état du channelsList
-channelsList.style.display = "none";
+// Initialiser l'état du listeCanaux
+listeCanaux.style.display = "none";
+
+// PARAMÈTRES PROFIL (modal)
+const btnSettings = document.getElementById("btn-settings");
+const modalSettings = document.getElementById("modal-settings");
+const closeSettings = document.getElementById("close-settings");
+const avatarChoices = document.querySelectorAll(".avatar-choice");
+const avatarDiv = document.querySelector(".sidebar-footer .avatar");
+const avatarUpload = document.getElementById("avatar-upload");
+const importedAvatarPreview = document.getElementById("imported-avatar-preview");
+const descriptionUtilisateur = document.getElementById("user-description");
+
+if (btnSettings) {
+btnSettings.addEventListener("click", () => {
+  modalSettings.style.display = "flex";
+  // Charger description si déjà enregistrée
+  descriptionUtilisateur.value = localStorage.getItem("userDescription") || "";
+});
+}
+closeSettings.addEventListener("click", () => {
+  modalSettings.style.display = "none";
+  localStorage.setItem("userDescription", descriptionUtilisateur.value);
+});
+window.addEventListener("click", (e) => {
+  if (e.target === modalSettings) {
+    modalSettings.style.display = "none";
+    localStorage.setItem("userDescription", descriptionUtilisateur.value);
+  }
+});
+descriptionUtilisateur.addEventListener("saisie", () => {
+  localStorage.setItem("userDescription", descriptionUtilisateur.value);
+});
+avatarChoices.forEach(img => {
+  img.addEventListener("click", async () => {
+    avatarChoices.forEach(i => i.classList.remove("selected"));
+    img.classList.add("selected");
+    // Envoi au serveur même pour un avatar de base
+    try {
+      const res = await fetch("/upload-avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: monIDUtilisateur, baseAvatar: img.dataset.avatar })
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        avatarDiv.innerHTML = `<img src='${data.url}' alt='Avatar' style='width:32px;height:32px;border-radius:50%;object-fit:cover;'>`;
+        localStorage.setItem("userAvatar", data.url);
+      } else {
+        alert("Erreur lors du choix de l'avatar");
+      }
+    } catch (err) {
+      alert("Erreur lors du choix de l'avatar");
+    }
+    modalSettings.style.display = "none";
+  });
+});
+// Import d'image personnalisée (synchronisation serveur)
+avatarUpload.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(ev) {
+    importedAvatarPreview.src = ev.target.result;
+    importedAvatarPreview.style.display = "inline-block";
+    importedAvatarPreview.classList.add("selected");
+    avatarChoices.forEach(i => i.classList.remove("selected"));
+    // Envoi au serveur
+    try {
+      const res = await fetch("/upload-avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: monIDUtilisateur, imageBase64: ev.target.result })
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        avatarDiv.innerHTML = `<img src='${data.url}' alt='Avatar' style='width:32px;height:32px;border-radius:50%;object-fit:cover;'>`;
+        // Optionnel : stocker l'URL pour affichage local immédiat
+        localStorage.setItem("userAvatar", data.url);
+      } else {
+        alert("Erreur lors de l'upload de l'avatar");
+      }
+    } catch (err) {
+      alert("Erreur lors de l'upload de l'avatar");
+    }
+    modalSettings.style.display = "none";
+  };
+  reader.readAsDataURL(file);
+});
+// Affichage avatar/description au chargement
+window.addEventListener("DOMContentLoaded", () => {
+  const savedAvatar = localStorage.getItem("userAvatar");
+  if (savedAvatar) {
+    avatarDiv.innerHTML = `<img src='${savedAvatar}' alt='Avatar' style='width:32px;height:32px;border-radius:50%;object-fit:cover;'>`;
+  }
+  const savedDesc = localStorage.getItem("userDescription");
+  if (savedDesc) descriptionUtilisateur.value = savedDesc;
+});
 
 } //fin du if(estPageChat)
 
@@ -523,27 +715,25 @@ async function sha256(message) {
 
 // ─── INSCRIPTION ───────────────────────────────────────────────────────────────────
 async function senduser() {
-    const username = document.getElementById('username').value.trim();
+    const nomUtilisateur = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
     const email    = document.getElementById('email').value.trim();
 
-    if (!username || !password) {
+    if (!nomUtilisateur || !password) {
         alert("Remplis tous les champs !");
         return;
     }
 
-    // 1. On hache le mot de passe côté client AVANT de l'envoyer
     const hashedPassword = await sha256(password);
 
-    // 2. On envoie au serveur PHP (le mdp en clair ne circule jamais)
     try {
-        const response = await fetch('/inscription', {
+        const reponse = await fetch('/inscription', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password: hashedPassword, email })
+            body: JSON.stringify({ username: nomUtilisateur, password: hashedPassword, email }) 
         });
 
-        const data = await response.json();
+        const data = await reponse.json();
 
         if (data.success) {
             alert("Compte créé ! Tu peux te connecter.");
@@ -559,10 +749,10 @@ async function senduser() {
 
 // ─── CONNEXION ─────────────────────────────────────────────────────────────────────
 async function login() {
-    const username = document.getElementById('username').value.trim();
+    const nomUtilisateur = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
 
-    if (!username || !password) {
+    if (!nomUtilisateur || !password) {
         alert("Remplis tous les champs !");
         return;
     }
@@ -572,16 +762,16 @@ async function login() {
 
     // 2. Envoi au serveur
     try {
-        const response = await fetch('/connexion', {
+        const reponse = await fetch('/connexion', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password: hashedPassword}) 
+            body: JSON.stringify({ username: nomUtilisateur, password: hashedPassword })
         });
 
-        const data = await response.json();
+        const data = await reponse.json();
 
         if (data.success) {
-            alert("Connecté ! Bienvenue " + data.username);
+            alert("Connecté ! Bienvenue " + data.nomUtilisateur);
             window.location.href = "chat_general.html";
         } else {
             alert("Erreur : " + data.message);
@@ -591,3 +781,183 @@ async function login() {
         console.error(err);
     }
 }
+
+// ─── EASTER EGGMAN ───
+if (logo && musique) {
+logo.addEventListener('click', () => {
+  if (musique.paused) {
+    // Si la musique est en pause, on la joue
+    musique.play();
+    logo.style.opacity = "0.7"; // Optionnel : petit feedback visuel quand ça joue
+  } else {
+    // Si elle joue déjà, on la met en pause et on revient au début
+    musique.pause();
+    musique.currentTime = 0; 
+logo.style.opacity = "1";
+  }
+});
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+// GESTION DES GROUPES DE DISCUSSION
+// ═════════════════════════════════════════════════════════════════════════════
+
+function ouvrirModalGroupe() {
+  const modal = document.getElementById('modal-creer-groupe');
+  const champ = document.getElementById('champ-nom-groupe');
+  champ.value = '';
+  champ.style.border = '1px solid #444';
+  modal.style.display = 'flex';
+  champ.focus();
+}
+
+function fermerModalGroupe() {
+  document.getElementById('modal-creer-groupe').style.display = 'none';
+}
+
+async function validerCreationGroupe() {
+  const champ = document.getElementById('champ-nom-groupe');
+  const nom = champ.value.trim();
+
+  if (!nom) {
+    champ.style.border = '2px solid #c0000e';
+    champ.focus();
+    return;
+  }
+  champ.style.border = '1px solid #444';
+
+  try {
+    const res = await fetch('/groupes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nom })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => null);
+      throw new Error(errData?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    if (data.success) {
+      fermerModalGroupe();
+      await rafraichirGroupes();
+    } else {
+      alert('Erreur : ' + data.message);
+    }
+  } catch (e) {
+    console.error('Erreur création groupe :', e);
+    alert('Le serveur ne répond pas. ' + (e.message || '')); 
+  }
+}
+
+async function rafraichirGroupes() {
+  const groupesList = document.getElementById('groupes-list');
+  if (!groupesList) return;
+  groupesList.innerHTML = '';
+  try {
+    const res = await fetch('/groupes');
+    const data = await res.json();
+    if (data.success && Array.isArray(data.groupes)) {
+      data.groupes.forEach(groupe => {
+        const div = document.createElement('div');
+        div.classList.add('channel-item');
+        div.style.display = 'flex';
+        div.style.justifyContent = 'space-between';
+        div.style.alignItems = 'center';
+
+        const nom = document.createElement('span');
+        nom.textContent = '👥 ' + groupe.nom;
+        nom.style.cursor = 'pointer';
+        nom.onclick = () => changerCanal('GROUPE_' + groupe.id, 'group', groupe.nom);
+
+        // Bouton gérer membres
+        const btnGerer = document.createElement('span');
+        btnGerer.textContent = '⚙️';
+        btnGerer.style.cursor = 'pointer';
+        btnGerer.style.fontSize = '12px';
+        btnGerer.style.opacity = '0.6';
+        btnGerer.title = 'Gérer les membres';
+        btnGerer.onclick = (e) => { e.stopPropagation(); ouvrirGestionMembres(groupe.id, groupe.nom); };
+
+        div.appendChild(nom);
+        div.appendChild(btnGerer);
+        groupesList.appendChild(div);
+      });
+    }
+  } catch (e) {
+    console.error('Erreur rafraîchirGroupes :', e);
+  }
+}
+
+// Ouvre la modale de gestion des membres
+async function ouvrirGestionMembres(groupeId, nomGroupe) {
+  // Crée la modale si elle n'existe pas
+  let modal = document.getElementById('modal-membres');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modal-membres';
+    modal.style.cssText = `display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.8); z-index:10001; align-items:center; justify-content:center;`;
+    modal.innerHTML = `
+      <div style="background:#1a1a1a; padding:25px; border-radius:12px; border:1px solid #c0000e; width:380px;">
+        <h2 id="modal-membres-titre" style="color:white; margin:0 0 16px; font-size:1.1rem;"></h2>
+        <div id="membres-liste" style="margin-bottom:16px; max-height:200px; overflow-y:auto;"></div>
+        <div style="display:flex; gap:8px; margin-bottom:16px;">
+          <input id="input-ajout-membre" type="text" placeholder="Pseudo à ajouter..."
+            style="flex:1; padding:10px; background:#333; border:1px solid #444; color:white; border-radius:5px; outline:none;">
+          <button onclick="ajouterMembreGroupe()"
+            style="background:#c0000e; color:white; border:none; padding:10px 16px; border-radius:5px; cursor:pointer;">
+            Ajouter
+          </button>
+        </div>
+        <button onclick="document.getElementById('modal-membres').style.display='none'"
+          style="background:transparent; color:#aaa; border:none; cursor:pointer; width:100%; text-align:right;">
+          Fermer
+        </button>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+
+  modal.dataset.groupeId = groupeId;
+  document.getElementById('modal-membres-titre').textContent = '👥 ' + nomGroupe;
+  modal.style.display = 'flex';
+  await chargerMembres(groupeId);
+}
+
+async function chargerMembres(groupeId) {
+  const liste = document.getElementById('membres-liste');
+  const res = await fetch(`/groupes/${groupeId}/membres`);
+  const data = await res.json();
+  liste.innerHTML = '';
+  if (data.success) {
+    data.membres.forEach(m => {
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:6px 0; color:#ccc; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.05);';
+      div.textContent = '👤 ' + m.username;
+      liste.appendChild(div);
+    });
+  }
+}
+
+async function ajouterMembreGroupe() {
+  const groupeId = document.getElementById('modal-membres').dataset.groupeId;
+  const nomUtilisateur = document.getElementById('input-ajout-membre').value.trim();
+  if (!nomUtilisateur) return;
+  const res = await fetch(`/groupes/${groupeId}/membres`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nomUtilisateur })
+  });
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById('input-ajout-membre').value = '';
+    await chargerMembres(groupeId);
+  } else {
+    alert(data.message || 'Erreur');
+  }
+}
+
+window.ajouterMembreGroupe = ajouterMembreGroupe;
+window.ouvrirGestionMembres = ouvrirGestionMembres;

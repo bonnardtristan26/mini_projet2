@@ -20,19 +20,19 @@
 
 &#x20;**2.** Installez **VS Code** puis installez les extensions suivantes sur VS Code :
 
-&#x09;**JavaScript**
+&#x09;JavaScript
 
-&#x09;**Babel Javascript**
+&#x09;Babel Javascript
 
-&#x09;**GitHub Repositories**
+&#x09;GitHub Repositories
 
-&#x09;**GitHub pull requests**
+&#x09;GitHub pull requests
 
-&#x09;**GitHub Actions**
+&#x09;GitHub Actions
 
-&#x09;**Live Preview**
+&#x09;Live Preview
 
-&#x09;**HTML/CSS Support**
+&#x09;HTML/CSS Support
 
 &#x20;
 
@@ -84,9 +84,9 @@
 
 
 
-&#x20;   Dans **Vos Alias**, cliquez sur **PhpMyAdmin (version de phpMyAdmin),** entrez le nom d'utilisateur **root** et le mot de passe **root**
+&#x20;   Dans **Vos Alias**, cliquez sur **PhpMyAdmin (version de phpMyAdmin),** entrez le nom d'utilisateur **root** et ne mettez pas de mot de passe
 
-&#x20;   puis changez le chois du serveur de MySQL à **MariaDB.**
+&#x20;   puis changez le choix du serveur de **MySQL** à **MariaDB.**
 
 &#x20;   Ensuite dans votre repository **GitHub,** récupérez le fichier **bdd.sql** dans le fichier **Serveur/BDD/**, puis allez dans
 
@@ -94,9 +94,9 @@
 
 
 
-&#x20;   Cliquez sur le nom de votre nouvelle base de donnée à gauche, puis allez dans l'onglet **Importer,** dans la rubrique 
+&#x20;   Cliquez sur le nom de votre nouvelle base de donnée à gauche, puis allez dans l'onglet **Importer,** dans la rubrique
 
-&#x20;   **Fichier à importer,** cliquez sur **Choisir un fichier** et choisissez le fichier **bdd.sql**, descendez tous en bas 
+&#x20;   **Fichier à importer,** cliquez sur **Choisir un fichier** et choisissez le fichier **bdd.sql**, descendez tous en bas
 
 &#x20;   de la page puis cliquez sur **Importer.**
 
@@ -112,15 +112,21 @@
 
 &#x09;
 
-&#x20;**6.** Il vous faudra aussi vous créer un compte **Brevo** afin de changer la **clé API** dans le code aux **lignes 70** et **72** du fichier **serveur.js**
+&#x20;**6.** Il vous faudra aussi vous créer un compte **Brevo** afin de changer la **clé API** dans le code à la ligne **ligne 73** du fichier **serveur.js**
 
-&#x20;   Voici le lien pour le compte **Brevo** : 
+&#x20;   Voici le lien pour le compte **Brevo** :
 
 &#x20;   **https://app.brevo.com/settings/keys/smtp**
 
 &#x20;   Vous devrez vous créer un compte avant d'accéder au site. Une fois que c'est fait, vous devrez vous connecter, puis accéder
 
 &#x20;   au menu **Clés API et MCP**, puis sur **Générer une nouvelle clé API**, nommez la et c'est bon !
+
+
+
+##### &#x09;**ATTENTION**
+
+&#x09;**A chaque fois que vous changer de machine pour lancer votre serveur, vous devez créer une nouvelle clé API**
 
 &#x09;
 
